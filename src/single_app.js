@@ -127,30 +127,7 @@
     '手艺人': 'Artesano',
     '建筑工人': 'Peón de la construcción',
     /* 垂直层名 */
-    '地下层': 'Sótano',
-    '江面层': 'Nivel del río',
-    '桥层': 'Nivel del puente',
-    '街面层': 'Nivel de calle',
-    '梯坎层': 'Nivel de escaleras',
-    '居住层': 'Nivel residencial',
-    '塔楼层': 'Nivel de torre',
-    '天台层': 'Nivel de azotea',
     /* 楼型名（终局卡和分享文案里出现） */
-    '无电梯梯坎楼': 'Bloque sin ascensor',
-    '轻轨穿楼': 'Bloque atravesado por el metro',
-    '电梯楼': 'Bloque con ascensor',
-    '半地下室隔间': 'Sótano convertido en cuarto',
-    '江边吊脚楼': 'Casa sobre pilotes junto al río',
-    '桥下铺': 'Bajo el puente',
-    '下店上住': 'Tienda abajo, casa arriba',
-    '梯坎老楼': 'Bloque viejo de escaleras',
-    '千禧老公房': 'Bloque del milenio',
-    '江景塔楼': 'Torre con vistas al río',
-    '顶层阁楼': 'Ático',
-    '老旧小区': 'Barrio viejo',
-    '苏式筒子楼': 'Bloque soviético',
-    '工人新村': 'Villa de los trabajadores',
-    '新建高层': 'Torre nueva',
     '一生一城，不可重掷。': 'Una vida. Una ciudad. Sin volver a tirar.',
     '游戏本体永远免费': 'El juego es gratis para siempre',
     '付费只买纪念品，不改命。': 'Solo se paga por los recuerdos, nunca por el destino.',
@@ -219,6 +196,20 @@
     return en;
   }
 
+  /* 动态文案：翻译键必须固定，不能把数字拼进键里（那样永远查不到译文）。
+   * UD('ui:每天爬', { '%': '12 层', '{n}': '12' }, 'Climb 12 flights a day') */
+  function UD(id, subs, fallback) {
+    var body = null;
+    if (state.lang === 'es' && root.CQI18N && root.CQI18N.t) {
+      body = root.CQI18N.t(id.indexOf('ui:') === 0 ? id : 'ui:' + id, 'es');
+    }
+    if (!body) body = fallback;
+    for (var k in subs) {
+      if (Object.prototype.hasOwnProperty.call(subs, k)) body = body.split(k).join(subs[k]);
+    }
+    return body;
+  }
+
   /* 抉择文案：西语包 → 英文 → 中文 */
   function cText(id, fallbackZh, fallbackEn) {
     if (state.lang === 'es') {
@@ -247,7 +238,10 @@
 
   /* 地点类文案（层 / 楼型 / 地标）的三语取值 —— 见 cqcityview.js 同名函数。 */
   function placeText(key, fallback) {
-    var lang = (window.CQSTATE && window.CQSTATE.lang) || 'en';
+    /* 用本地 state 而不是 window.CQSTATE —— 单文件版没有把 state 挂到 window 上，
+     * 挂上去也没必要。读 window.CQSTATE 的结果是永远 undefined，
+     * 于是西语界面里地点名全是英文fallback。 */
+    var lang = (typeof state !== 'undefined' && state.lang) || 'en';
     if (lang !== 'zh') {
       var v = (window.CQI18N && window.CQI18N.t) ? window.CQI18N.t(key, lang) : null;
       if (v) return v;
@@ -327,8 +321,11 @@
     };
     [
       [U('生于'), String(state.birthYear)],
-      [U('区县'), b.district + ' / ' + b.districtEn],
-      [U('家庭'), b.familyZh + ' / ' + b.familyEn],
+      /* 只显示当前语言的那一份。之前是「中文 / 英文」并排，
+       * 于是西语界面里会冒出中文区县名和中文家庭类型。 */
+      [U('区县'), state.lang === 'zh' ? (b.district + ' / ' + b.districtEn) : b.districtEn],
+      [U('家庭'), state.lang === 'zh' ? (b.familyZh + ' / ' + b.familyEn)
+        : placeText('fam:' + b.family, b.familyEn)],
       [U('性别'), b.sex === 'm' ? U('男') : U('女')],
       [U('收入五分位'), qLabel(b.incomeQuintile)],
       [U('城镇') + ' / ' + U('农村'), b.urban ? U('城镇') : U('农村')]
@@ -442,7 +439,15 @@
     var rent = Math.round(prof.rentBase * 100);
     if (rent <= 100) bits.push(U('租金最低的一档'));
     else if (rent <= 115) bits.push(U('租金中等'));
-    else bits.push(U('租金贵 ' + (rent - 100) + '%'));
+    else {
+      var overPct = rent - 100;
+      bits.push((state.lang === 'zh')
+        ? ('租金贵 ' + overPct + '%')
+        : (state.lang === 'es'
+           ? UD('ui:租金贵', { '%': String(overPct) + '%', '{n}': String(overPct) },
+                'Rent ' + overPct + '% above the cheapest')
+           : ('Rent ' + overPct + '% above the cheapest')));
+    }
     if (prof.extraStairs > 0) bits.push(U('身体负担重'));
     if (f === b.floors && b.floors >= 12) bits.push(U('但晒、吵、孤单'));
     return bits.join(' · ');
@@ -474,8 +479,20 @@
       if (b.lift) stairTxt = U('电梯直达，腿不累');
       else if (prof.extraStairs === 0) stairTxt = U('出门就是平路，不用爬楼');
       else {
-        stairTxt = U('每天爬 ' + prof.extraStairs + ' 层');
-        if (prof.entranceFloor > 1) stairTxt += U('（从 ' + prof.entranceFloor + ' 楼入口进）');
+        stairTxt = (state.lang === 'zh')
+          ? ('每天爬 ' + prof.extraStairs + ' 层')
+          : (state.lang === 'es'
+             ? UD('ui:每天爬', { '%': prof.extraStairs + ' 层', '{n}': String(prof.extraStairs) },
+                  'Climb ' + prof.extraStairs + ' flights a day')
+             : ('Climb ' + prof.extraStairs + ' flights a day'));
+        if (prof.entranceFloor > 1) {
+          stairTxt += (state.lang === 'zh')
+            ? ('（从 ' + prof.entranceFloor + ' 楼入口进）')
+            : (state.lang === 'es'
+               ? UD('ui:从入口进', { '%': prof.entranceFloor + ' 楼', '{n}': String(prof.entranceFloor) },
+                    ' (enter at floor ' + prof.entranceFloor + ')')
+               : (' (enter at floor ' + prof.entranceFloor + ')'));
+        }
       }
       mid.appendChild(el('div', 'f-line', (b.lift ? '🛗 ' : '🪜 ') + stairTxt));
       mid.appendChild(el('div', 'f-line dim', describeEnv(prof, b, f)));
@@ -870,7 +887,7 @@
 
     if (lm.tag) {
       var tags = el('div', 'lmtags');
-      tags.appendChild(el('span', 'lmtag', lm.tag));
+      tags.appendChild(el('span', 'lmtag', placeText('tag:' + lm.tag, lm.tag)));
       panel.appendChild(tags);
     }
 
@@ -918,12 +935,9 @@
     (R.LAYERS || []).forEach(function (x) { if (x.id === id) L = x; });
     if (!L) return id;
     if (state.lang === 'zh') return L.zh + ' ' + id;
-    if (state.lang === 'es') {
-      /* 西语：垂直层名有专门的译名，其余情况回落英文 */
-      var v = ES_EXTRA[L.zh] || L.en;
-      return v + ' ' + id;
-    }
-    return L.en + ' ' + id;
+    /* 垂直层名走 place pack（layer:<id>:name） */
+    var v = placeText('layer:' + id + ':name', L.en);
+    return v + ' ' + id;
   }
 
   /* 职业名（跟随语言） */

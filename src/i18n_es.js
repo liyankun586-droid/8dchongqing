@@ -299,6 +299,9 @@
   root.CQI18N_PACK_ES['ui:一般'] = { body: 'Normal' };
   root.CQI18N_PACK_ES['ui:租金最低的一档'] = { body: 'Lo más barato de este piso' };
   root.CQI18N_PACK_ES['ui:租金中等'] = { body: 'Alquiler medio' };
+  root.CQI18N_PACK_ES['ui:租金贵'] = { body: 'Alquiler un % más caro que el más barato' };
+  root.CQI18N_PACK_ES['ui:从入口进'] = { body: ' (entras en el piso {n})' };
+  root.CQI18N_PACK_ES['ui:每天爬'] = { body: 'Subes {n} pisos al día' };
   root.CQI18N_PACK_ES['ui:身体负担重'] = { body: 'Pesa en el cuerpo' };
   root.CQI18N_PACK_ES['ui:但晒、吵、孤单'] = { body: 'Pero sol, ruido y soledad' };
   root.CQI18N_PACK_ES['ui:电梯直达，腿不累'] = { body: 'Ascensor directo, las piernas descansan' };

@@ -9,7 +9,7 @@
  *   form:stilt:name  form:stilt:note
  *   lm:hongyadong:name  lm:hongyadong:blurb
  *
- * 共 114 条。
+ * 共 129 条。
  */
 var CQI18N_PACK_KO_PLACE = {
   /* ---- 垂直层 ---- */
@@ -129,4 +129,21 @@ var CQI18N_PACK_KO_PLACE = {
   'lm:yikeshu:name': '난산(南山) ‘나무 한 그루’ 전망대',
   'lm:yuzhong-night:blurb': '반도 전체가 한 번에 켜진다. 불빛 더미가 강에서 곧장 자라난 것처럼, 두 강 사이에 끼어 있다.',
   'lm:yuzhong-night:name': '위중반도(渝中半島) 야경',
+  /* ---- 地标地貌标签 ---- */
+  'tag:footpath-stairs': '돌계단 오르막',
+  'tag:hilltop-view': '언덕 위 전망',
+  'tag:modern-skyline': '현대식 스카이라인',
+  'tag:multi-level-road': '다층 도로',
+  'tag:night-neon': '야간 네온',
+  'tag:old-town': '구시가지',
+  'tag:rail-through-building': '건물을 관통하는 열차',
+  'tag:river-bridge': '강 위 다리',
+  'tag:river-confluence': '하천 합류 지점',
+  'tag:stacked-cliffs': '겹겹이 쌓인 절벽',
+  /* ---- 家庭类型 ---- */
+  'fam:left_behind': '남겨진 아이',
+  'fam:migrant_child': '이민배 아이',
+  'fam:migrant_worker': '이민 노동자 가정',
+  'fam:rural_local': '현지 농촌 가정',
+  'fam:urban_local': '현지 도시 가정',
 };

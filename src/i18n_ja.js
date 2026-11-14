@@ -292,6 +292,9 @@
   root.CQI18N_PACK_JA['ui:一般'] = { body: '普通' };
   root.CQI18N_PACK_JA['ui:租金最低的一档'] = { body: 'この階で一番安い' };
   root.CQI18N_PACK_JA['ui:租金中等'] = { body: '家賃は中くらい' };
+  root.CQI18N_PACK_JA['ui:租金贵'] = { body: '最も安い層より家賃 % 高い' };
+  root.CQI18N_PACK_JA['ui:从入口进'] = { body: '（{n}階入口から入る）' };
+  root.CQI18N_PACK_JA['ui:每天爬'] = { body: '1日{n}階段的ぼり' };
   root.CQI18N_PACK_JA['ui:身体负担重'] = { body: '体への負担が大きい' };
   root.CQI18N_PACK_JA['ui:但晒、吵、孤单'] = { body: 'でも日当たりも騒音も孤独も' };
   root.CQI18N_PACK_JA['ui:电梯直达，腿不累'] = { body: 'エレベーターで直行、脚は楽' };

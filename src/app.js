@@ -55,6 +55,31 @@
     return en;
   }
 
+  /* 动态文案：翻译包的键必须是固定的「ui:<中文原文>」，
+   * 不能把数字拼进键里 —— 那样永远查不到译文，非中文语言下
+   * 只会退回英文。td() 的用法：给一个固定的中文键和一组替换，
+   * 先取译文，再把 % / {n} 换成实际数值。
+   *   td('ui:每天爬', { '%': '12 层', '{n}': '12' }, 'Climb 12 flights a day')
+   * 键里带 'ui:' 前缀就直接查包；不带则视为中文原文。 */
+  function td(id, subs, fallback) {
+    var packs = (window.CQI18N && window.CQI18N.PACKS) || {};
+    var chain = (window.CQI18N && window.CQI18N.FALLBACK && window.CQI18N.FALLBACK[state.lang]) ||
+                [state.lang, 'en'];
+    var key = id.indexOf('ui:') === 0 ? id : 'ui:' + id;
+    var body = null;
+    for (var i = 0; i < chain.length; i++) {
+      var p = packs[chain[i]];
+      if (p && p[key] && p[key].body) { body = p[key].body; break; }
+    }
+    if (!body) body = fallback;
+    for (var k in subs) {
+      if (Object.prototype.hasOwnProperty.call(subs, k)) {
+        body = body.split(k).join(subs[k]);
+      }
+    }
+    return body;
+  }
+
   var I18N = {
     zh: {
       title: '渝你有约', tag: 'THE 8D CITY', tagline: '一生一城，不可重掷。',
@@ -344,7 +369,8 @@
      * 中文界面保留拼音（districtEn）作辅助，因为那是英文名不是拉丁转写，
      * 但英文/日/韩/西界面一律只显示英文那一份。 */
     var districtLabel = state.lang === 'zh' ? (b.district + ' / ' + b.districtEn) : b.districtEn;
-    var familyLabel = state.lang === 'zh' ? (b.familyZh + ' / ' + b.familyEn) : b.familyEn;
+    var familyLabel = state.lang === 'zh' ? (b.familyZh + ' / ' + b.familyEn)
+      : placeText('fam:' + b.family, b.familyEn);
     [
       [T('born') + ' ' + state.birthYear, ''],
       [T('district'), districtLabel],
@@ -518,7 +544,23 @@
     } else if (rent <= 115) {
       rentTxt = t('租金中等', 'Mid-range rent');
     } else {
-      rentTxt = t('租金贵 ' + (rent - 100) + '%', 'Rent ' + (rent - 100) + '% above the cheapest');
+      /* 动态百分比文案：翻译包的键是固定的 'ui:租金贵'，
+       * 不能把数字拼进键里（那样永远查不到译文，只能退回英文）。
+       * 所以：先按固定键取译文，再把数字插回去。 */
+      var overPct = rent - 100;
+      var rentZh = '租金贵 ' + overPct + '%';
+      var rentEn = 'Rent ' + overPct + '% above the cheapest';
+      if (state.lang === 'zh' || state.lang === 'en') rentTxt = state.lang === 'zh' ? rentZh : rentEn;
+      else {
+        var _packs = (window.CQI18N && window.CQI18N.PACKS) || {};
+        var _chain = (window.CQI18N && window.CQI18N.FALLBACK && window.CQI18N.FALLBACK[state.lang]) || [state.lang, 'en'];
+        var _body = null;
+        for (var _i = 0; _i < _chain.length; _i++) {
+          var _p = _packs[_chain[_i]];
+          if (_p && _p['ui:租金贵'] && _p['ui:租金贵'].body) { _body = _p['ui:租金贵'].body; break; }
+        }
+        rentTxt = _body ? _body.replace('%', overPct + '%') : rentEn;
+      }
     }
     bits.push(rentTxt);
     if (prof.extraStairs > 0) {
@@ -560,12 +602,22 @@
       } else if (prof.extraStairs === 0) {
         stairTxt = t('出门就是平路，不用爬楼', 'Door opens onto the street — no stairs');
       } else {
-        stairTxt = t('每天爬 ' + prof.extraStairs + ' 层',
-                     'Climb ' + prof.extraStairs + ' flights a day');
+        /* 动态文案：键必须固定，数字靠 td() 插回去（见 td 的注释）。
+         * 直接把数字拼进 t() 的第一个参数，翻译包永远查不到。 */
+        stairTxt = (state.lang === 'zh')
+          ? ('每天爬 ' + prof.extraStairs + ' 层')
+          : (state.lang === 'en'
+             ? ('Climb ' + prof.extraStairs + ' flights a day')
+             : td('ui:每天爬', { '%': prof.extraStairs + ' 层', '{n}': String(prof.extraStairs) },
+                  'Climb ' + prof.extraStairs + ' flights a day'));
         // 白象居式多入口：住在入口层之上的人爬得少——这是最反直觉也最关键的信息
         if (prof.entranceFloor > 1) {
-          stairTxt += t('（从 ' + prof.entranceFloor + ' 楼入口进）',
-                        ' (enter at floor ' + prof.entranceFloor + ')');
+          stairTxt += (state.lang === 'zh')
+            ? ('（从 ' + prof.entranceFloor + ' 楼入口进）')
+            : (state.lang === 'en'
+               ? (' (enter at floor ' + prof.entranceFloor + ')')
+               : td('ui:从入口进', { '%': prof.entranceFloor + ' 楼', '{n}': String(prof.entranceFloor) },
+                    ' (enter at floor ' + prof.entranceFloor + ')'));
         }
       }
       mid.appendChild(el('div', 'f-line', (b.lift ? '🛗 ' : '🪜 ') + stairTxt));

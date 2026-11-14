@@ -9,7 +9,7 @@
  *   form:stilt:name  form:stilt:note
  *   lm:hongyadong:name  lm:hongyadong:blurb
  *
- * 共 114 条。
+ * 共 129 条。
  */
 var CQI18N_PACK_JA_PLACE = {
   /* ---- 垂直层 ---- */
@@ -129,4 +129,21 @@ var CQI18N_PACK_JA_PLACE = {
   'lm:yikeshu:name': '南山（ナンシャン）一本木（イッポンキ）観景台',
   'lm:yuzhong-night:blurb': '半島全体が一気に点灯し、光の塊が江の中から直接立ち上がる。二本の江に挟まれたような眺めだ。',
   'lm:yuzhong-night:name': '渝中半島の夜景',
+  /* ---- 地标地貌标签 ---- */
+  'tag:footpath-stairs': '石段の小径',
+  'tag:hilltop-view': '山頂の展望',
+  'tag:modern-skyline': '現代的なスカイライン',
+  'tag:multi-level-road': '多層道路',
+  'tag:night-neon': '夜のネオン',
+  'tag:old-town': '古い街並み',
+  'tag:rail-through-building': 'ビルを貫く列車',
+  'tag:river-bridge': '川の橋',
+  'tag:river-confluence': '合流点',
+  'tag:stacked-cliffs': '重なる崖',
+  /* ---- 家庭类型 ---- */
+  'fam:left_behind': '留守っ子',
+  'fam:migrant_child': '移住した子ども',
+  'fam:migrant_worker': '越境来做工の世帯',
+  'fam:rural_local': '農村の本地世帯',
+  'fam:urban_local': '都市の本地世帯',
 };

@@ -177,7 +177,9 @@
     var tagList = lm.tags || (lm.tag ? [lm.tag] : []);
     var tags = el('div', 'lmtags');
     tagList.forEach(function (t) {
-      tags.appendChild(el('span', 'lmtag', t));
+      /* 标签原本是英文词表（'river-bridge' 之类），直接露给玩家。
+       * 现在走翻译包（tag:<tag>），没有译文时退回原值。 */
+      tags.appendChild(el('span', 'lmtag', placeText('tag:' + t, t)));
     });
     if (tags.children.length) this.host.appendChild(tags);
 

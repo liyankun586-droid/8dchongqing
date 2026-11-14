@@ -287,6 +287,9 @@
   root.CQI18N_PACK_KO['ui:一般'] = { body: '보통' };
   root.CQI18N_PACK_KO['ui:租金最低的一档'] = { body: '이 층 중 가장 싼 곳' };
   root.CQI18N_PACK_KO['ui:租金中等'] = { body: '월세는 중간' };
+  root.CQI18N_PACK_KO['ui:租金贵'] = { body: '가장 싼 층보다 월세 % 비쌈' };
+  root.CQI18N_PACK_KO['ui:从入口进'] = { body: '({n}층 입구로 들어감)' };
+  root.CQI18N_PACK_KO['ui:每天爬'] = { body: '하루에 {n}층씩 오름' };
   root.CQI18N_PACK_KO['ui:身体负担重'] = { body: '몸에 부담이 크다' };
   root.CQI18N_PACK_KO['ui:但晒、吵、孤单'] = { body: '하지만 햇빛·소음·외로움' };
   root.CQI18N_PACK_KO['ui:电梯直达，腿不累'] = { body: '엘리베이터 직통, 다리는 편해' };

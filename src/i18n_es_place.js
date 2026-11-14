@@ -9,7 +9,7 @@
  *   form:stilt:name  form:stilt:note
  *   lm:hongyadong:name  lm:hongyadong:blurb
  *
- * 共 114 条。
+ * 共 129 条。
  */
 var CQI18N_PACK_ES_PLACE = {
   /* ---- 垂直层 ---- */
@@ -129,4 +129,21 @@ var CQI18N_PACK_ES_PLACE = {
   'lm:yikeshu:name': 'Nanshan One Tree (南山一棵树)',
   'lm:yuzhong-night:blurb': 'Toda la península se enciende de golpe, un acantilado de torres iluminadas que crece directamente del agua entre dos ríos.',
   'lm:yuzhong-night:name': 'Yuzhong Peninsula Night View (渝中半岛夜景)',
+  /* ---- 地标地貌标签 ---- */
+  'tag:footpath-stairs': 'Escalinata',
+  'tag:hilltop-view': 'Vista desde la colina',
+  'tag:modern-skyline': 'Horizonte moderno',
+  'tag:multi-level-road': 'Carretera multinivel',
+  'tag:night-neon': 'Neón nocturno',
+  'tag:old-town': 'Ciudad vieja',
+  'tag:rail-through-building': 'Tren a través del edificio',
+  'tag:river-bridge': 'Puente sobre el río',
+  'tag:river-confluence': 'Confluencia de ríos',
+  'tag:stacked-cliffs': 'Acantilados apilados',
+  /* ---- 家庭类型 ---- */
+  'fam:left_behind': 'Niño que se queda atrás',
+  'fam:migrant_child': 'Niño migrante',
+  'fam:migrant_worker': 'Familia de trabajadores migrantes',
+  'fam:rural_local': 'Familia rural local',
+  'fam:urban_local': 'Familia urbana local',
 };
