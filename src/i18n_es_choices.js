@@ -1,0 +1,96 @@
+/* Decisiones - español
+ * flat string pack, clave = idNodo:campo
+ * 7 nodos / 33 opciones (el origen trae 34 filas, una repetida) x 2 campos
+ * 4 prompts de nodo / 77 claves en total */
+var CQI18N_CHOICES_ES = {
+  /* ---- age5 ---- */
+  'age5:title': 'Tus padres se mudan. ¿Con quién te vas?',
+  'age5:follow:text': 'Ir a la ciudad con ellos',
+  'age5:follow:hint': 'Más por ver, pero sois forasteros.',
+  'age5:stay:text': 'Quedarte en el condado donde te criaste',
+  'age5:stay:hint': 'Conoces a todos, pero el mundo es pequeño.',
+  'age5:grand:text': 'Quedarte con los abuelos y estudiar',
+  'age5:grand:hint': 'Te criarás por tu cuenta.',
+  'age5:board:text': 'Te mandan a un colegio interno',
+  'age5:board:hint': 'Vuelves a casa una vez al año.',
+
+  /* ---- age15 ---- */
+  'age15:title': 'Ya salieron las notas del examen.',
+  'age15:prompt': 'En Chongqing, el 98,5 % de los que terminan la secundaria entra en bachillerato, pero solo cerca del 71 % llega al instituto general; el resto, a formación profesional o a una escuela técnica.',
+  'age15:general:text': 'Entrar en el instituto general y preparar la universidad',
+  'age15:general:hint': 'Dentro de tres años, el camino se ensancha.',
+  'age15:vocational:text': 'Ir a la formación profesional y aprender un oficio',
+  'age15:vocational:hint': 'Empiezas a ganar dinero dos años antes.',
+  'age15:technical:text': 'Entrar en una escuela técnica profesional',
+  'age15:technical:hint': 'Ni una ni otra: un término medio.',
+  'age15:work:text': 'Dejar los estudios e ir a trabajar por un sueldo',
+  'age15:work:hint': 'Dieciséis años y un sueldo de adulto.',
+
+  /* ---- age22 ---- */
+  'age22:title': 'Tu primer trabajo.',
+  'age22:prompt': 'Tienes veintidós años. En Chongqing hay 7,5 millones de trabajadores migrantes que llegan con su equipaje de los condados y de otras provincias.',
+  'age22:job_office:text': 'Conseguir un trabajo en una oficina',
+  'age22:job_office:hint': 'Digno, y con el techo bien alto.',
+  'age22:job_teacher:text': 'Dedicarte a la docencia, en un colegio',
+  'age22:job_teacher:hint': 'Un sueldo estable, y el respeto de todos.',
+  'age22:job_nurse:text': 'Ir al hospital a cuidar pacientes',
+  'age22:job_nurse:hint': 'Cansador, pero te necesitan.',
+  'age22:job_trade:text': 'Montar tu propio negocio y mandar tú',
+  'age22:job_trade:hint': 'Puedes hacer fortuna o perderlo todo.',
+  'age22:job_tech:text': 'Escribir código para ganarte la vida',
+  'age22:job_tech:hint': 'En esta ciudad, es la forma más digna de ganarte la vida.',
+  'age22:job_factory:text': 'Trabajar en la línea de montaje de una fábrica',
+  'age22:job_factory:hint': 'Trabajo fijo, y nunca te falta comida.',
+  'age22:job_driver:text': 'Conducir un camión o trabajar como taxista por app',
+  'age22:job_driver:hint': 'Se te va la vida en la carretera.',
+  'age22:job_craft:text': 'Aprender un oficio con las manos',
+  'age22:job_craft:hint': 'Tu oficio, tu precio.',
+  'age22:job_construction:text': 'Trabajar en una obra de construcción',
+  'age22:job_construction:hint': 'En Chongqing hay obras por todas partes. El dinero llega rápido; las rodillas, antes.',
+  'age22:job_bangbang:text': 'Hacer de cargador en el mercado de Chaotianmen',
+  'age22:job_bangbang:hint': 'Un hombro, un bulto: los músculos de esta ciudad.',
+
+  /* ---- age30 ---- */
+  'age30:title': '¿Podrás seguir con este trabajo?',
+  'age30:stay:text': 'Seguir con lo que ya sabes hacer',
+  'age30:stay:hint': 'La experiencia es capital.',
+  'age30:light:text': 'Cambiar a un trabajo más ligero',
+  'age30:light:hint': 'Si el cuerpo falla primero, nada más importa.',
+  'age30:risk:text': 'Arriesgarlo todo por tu propia cuenta',
+  'age30:risk:hint': 'O te enriqueces, o lo pierdes todo.',
+  'age30:move:text': 'Cambiar de casa y mudarte a la ciudad',
+  'age30:move:hint': 'Más oportunidades, y un alquiler que asusta.',
+
+  /* ---- age50 ---- */
+  'age50:title': 'Tu hijo ya es mayor.',
+  'age50:child_stay:text': 'Dejar que se quede en Chongqing',
+  'age50:child_stay:hint': 'Cerca de ti. A veces, demasiado cerca.',
+  'age50:child_away:text': 'Dejar que se vaya a la costa o al extranjero',
+  'age50:child_away:hint': 'Tendrá una vida que tú nunca tuviste.',
+  'age50:child_back:text': 'Traerle para que siga tu oficio',
+  'age50:child_back:hint': 'El oficio no se muere contigo.',
+  'age50:child_move:text': 'Mudarte a la ciudad donde viva tu hijo',
+  'age50:child_move:hint': 'Un lugar nuevo para los últimos años.',
+
+  /* ---- age70 ---- */
+  'age70:title': 'Setenta años.',
+  'age70:prompt': 'El piso sigue ahí. La pregunta es qué vas a cambiar por él.',
+  'age70:retire_move:text': 'Vender el piso y volver al condado',
+  'age70:retire_move:hint': 'Aire limpio, caras conocidas y ningún piso.',
+  'age70:retire_stay:text': 'Quedarte en la ciudad y no moverte',
+  'age70:retire_stay:hint': 'No te mueves. Eso es todo.',
+  'age70:retire_lease:text': 'Alquilar el piso y mudarte a uno pequeño',
+  'age70:retire_lease:hint': 'El piso se convierte en ingresos.',
+
+  /* ---- bangbang42 ---- */
+  'bangbang42:title': '¿Todavía puedes cargar con eso?',
+  'bangbang42:prompt': 'Cuando empezaste, este oficio lo hacían doscientas mil personas. Ahora en Chaotianmen no se llenan ni unas pocas cargas al día.',
+  'bangbang42:bb_persist:text': 'Seguir cargando bultos, un viaje tras otro',
+  'bangbang42:bb_persist:hint': 'Nunca aprendiste otra cosa.',
+  'bangbang42:bb_quit:text': 'Cambiar de oficio y empezar de cero',
+  'bangbang42:bb_quit:hint': 'Perderás el respeto, pero no pasarás hambre.',
+  'bangbang42:bb_teach:text': 'Enseñar el oficio a un aprendiz',
+  'bangbang42:bb_teach:hint': 'Conviertes la fuerza en otra cosa.',
+  'bangbang42:bb_driver:text': 'Cambiar a tirar de un carro de mano',
+  'bangbang42:bb_driver:hint': 'Nada en el hombro, pero más lento.',
+};

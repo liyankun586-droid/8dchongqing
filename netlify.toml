@@ -1,0 +1,15 @@
+[build]
+  publish = "dist"
+  command = "node tools/build_static.js"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[redirects]]
+  from = "/life/*"
+  to = "/404.html"
+  status = 404

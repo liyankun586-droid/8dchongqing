@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<rect width="512" height="512" fill="#0d1b2a"/>
+<line x1="52" y1="96" x2="460" y2="96" stroke="#1f2f45" stroke-width="2"/>
+<line x1="52" y1="130" x2="460" y2="130" stroke="#1f2f45" stroke-width="2"/>
+<line x1="52" y1="164" x2="460" y2="164" stroke="#1f2f45" stroke-width="2"/>
+<line x1="52" y1="198" x2="460" y2="198" stroke="#1f2f45" stroke-width="2"/>
+<line x1="52" y1="232" x2="460" y2="232" stroke="#1f2f45" stroke-width="2"/>
+<line x1="52" y1="266" x2="460" y2="266" stroke="#1f2f45" stroke-width="2"/>
+<line x1="52" y1="300" x2="460" y2="300" stroke="#1f2f45" stroke-width="2"/>
+<line x1="52" y1="334" x2="460" y2="334" stroke="#1f2f45" stroke-width="2"/>
+<rect x="150" y="96" width="150" height="272" fill="none" stroke="#e8b04b" stroke-width="4"/>
+<line x1="150" y1="96" x2="300" y2="96" stroke="#e8b04b" stroke-width="2" opacity="0.55"/>
+<line x1="150" y1="130" x2="300" y2="130" stroke="#e8b04b" stroke-width="2" opacity="0.55"/>
+<line x1="150" y1="164" x2="300" y2="164" stroke="#e8b04b" stroke-width="2" opacity="0.55"/>
+<line x1="150" y1="198" x2="300" y2="198" stroke="#e8b04b" stroke-width="2" opacity="0.55"/>
+<line x1="150" y1="232" x2="300" y2="232" stroke="#e8b04b" stroke-width="2" opacity="0.55"/>
+<line x1="150" y1="266" x2="300" y2="266" stroke="#e8b04b" stroke-width="2" opacity="0.55"/>
+<line x1="150" y1="300" x2="300" y2="300" stroke="#e8b04b" stroke-width="2" opacity="0.55"/>
+<line x1="150" y1="334" x2="300" y2="334" stroke="#e8b04b" stroke-width="2" opacity="0.55"/>
+<rect x="52" y="300" width="408" height="40" fill="#2a9d8f" opacity="0.45"/>
+<rect x="150" y="232" width="150" height="34" fill="#e8b04b" opacity="0.9"/>
+<polyline points="150,368 205,330 250,268 300,232" fill="none" stroke="#f0e2c0" stroke-width="5" stroke-linejoin="round"/>
+<circle cx="300" cy="232" r="9" fill="#f0e2c0"/>
+<text x="256" y="66" text-anchor="middle" font-family="Georgia, serif" font-size="42" fill="#f2ece0" letter-spacing="2">A DATE WITH</text>
+<text x="256" y="432" text-anchor="middle" font-family="Georgia, serif" font-size="56" font-weight="bold" fill="#e8b04b" letter-spacing="3">CHONGQING</text>
+<text x="256" y="470" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#8fa3b8" letter-spacing="6">THE 8D CITY</text>
+</svg>

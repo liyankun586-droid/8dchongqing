@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+<defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a1420"/><stop offset="55%" stop-color="#16293d"/><stop offset="100%" stop-color="#243b52"/>
+    </linearGradient>
+    <radialGradient id="lamp" cx="50%" cy="0%" r="70%">
+      <stop offset="0%" stop-color="#f4d58d" stop-opacity="0.28"/><stop offset="100%" stop-color="#f4d58d" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+<rect width="1920" height="1080" fill="url(#sky)"/>
+<ellipse cx="960" cy="0" rx="700" ry="360" fill="url(#lamp)"/>
+<g opacity="0.42">
+<rect x="60" y="570" width="72" height="510" fill="#0b1622"/>
+<rect x="150" y="630" width="72" height="450" fill="#0b1622"/>
+<rect x="250" y="530" width="72" height="550" fill="#0b1622"/>
+<rect x="350" y="660" width="72" height="420" fill="#0b1622"/>
+<rect x="470" y="550" width="72" height="530" fill="#0b1622"/>
+<rect x="560" y="610" width="72" height="470" fill="#0b1622"/>
+<rect x="700" y="520" width="72" height="560" fill="#0b1622"/>
+<rect x="830" y="640" width="72" height="440" fill="#0b1622"/>
+<rect x="980" y="540" width="72" height="540" fill="#0b1622"/>
+<rect x="1100" y="600" width="72" height="480" fill="#0b1622"/>
+<rect x="1240" y="510" width="72" height="570" fill="#0b1622"/>
+<rect x="1380" y="620" width="72" height="460" fill="#0b1622"/>
+<rect x="1520" y="530" width="72" height="550" fill="#0b1622"/>
+<rect x="1660" y="590" width="72" height="490" fill="#0b1622"/>
+<rect x="1790" y="520" width="72" height="560" fill="#0b1622"/>
+</g>
+<rect x="0" y="780" width="1920" height="300" fill="#1d4e4a" opacity="0.65"/>
+<rect x="0" y="780" width="1920" height="3" fill="#2a9d8f" opacity="0.8"/>
+<rect x="810" y="180" width="300" height="600" fill="none" stroke="#e8b04b" stroke-width="5"/>
+<line x1="810" y1="255" x2="1110" y2="255" stroke="#e8b04b" stroke-width="2.5" opacity="0.5"/>
+<line x1="810" y1="330" x2="1110" y2="330" stroke="#e8b04b" stroke-width="2.5" opacity="0.5"/>
+<line x1="810" y1="405" x2="1110" y2="405" stroke="#e8b04b" stroke-width="2.5" opacity="0.5"/>
+<line x1="810" y1="480" x2="1110" y2="480" stroke="#e8b04b" stroke-width="2.5" opacity="0.5"/>
+<line x1="810" y1="555" x2="1110" y2="555" stroke="#e8b04b" stroke-width="2.5" opacity="0.5"/>
+<line x1="810" y1="630" x2="1110" y2="630" stroke="#e8b04b" stroke-width="2.5" opacity="0.5"/>
+<line x1="810" y1="705" x2="1110" y2="705" stroke="#e8b04b" stroke-width="2.5" opacity="0.5"/>
+<rect x="810" y="555" width="300" height="75" fill="#e8b04b" opacity="0.85"/>
+<polyline points="830,740 900,660 980,552 1090,552" fill="none" stroke="#f0e2c0" stroke-width="7" stroke-linejoin="round"/>
+<text x="960" y="86" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#8fa3b8" letter-spacing="12">THE 8D CITY</text>
+<text x="960" y="120" text-anchor="middle" font-family="Georgia, serif" font-size="30" fill="#f2ece0" letter-spacing="4">A Date with Chongqing</text>
+<text x="960" y="930" text-anchor="middle" font-family="Georgia, serif" font-size="76" font-weight="bold" fill="#e8b04b" letter-spacing="6">ONE LIFE. ONE CITY.</text>
+<text x="960" y="1002" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="34" fill="#f2ece0" letter-spacing="4">No re-rolls.</text>
+</svg>

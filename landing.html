@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A Date with Chongqing — One life. One city. No re-rolls.</title>
+<meta name="description" content="A Date with Chongqing is a free browser life simulator set in Chongqing, China — the only 8D city on Earth. You do not choose where you are born. You choose which floor you live on, and the floor rewrites your life.">
+<link rel="canonical" href="https://8dchongqing.cn/landing.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="A Date with Chongqing — One life. One city. No re-rolls.">
+<meta property="og:description" content="A free browser life simulator set in Chongqing, the only 8D city on Earth. You do not choose where you are born. You choose which floor you live on.">
+<meta property="og:url" content="https://8dchongqing.cn/landing.html">
+<meta property="og:site_name" content="A Date with Chongqing">
+<meta property="og:image" content="https://8dchongqing.cn/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="A Date with Chongqing — One life. One city. No re-rolls.">
+<meta name="twitter:description" content="A free browser life simulator set in Chongqing, the only 8D city on Earth. You do not choose where you are born. You choose which floor you live on.">
+<meta name="twitter:image" content="https://8dchongqing.cn/og.png">
+<meta name="theme-color" content="#0b1420">
+<style>
+  :root {
+    --bg: #0b1420;
+    --bg2: #0e1926;
+    --ink: #e9eff7;
+    --muted: #92a5ba;
+    --dim: #6d8098;
+    --line: rgba(150, 180, 215, 0.16);
+    --gold: #d8b273;
+    --gold-dim: rgba(216, 178, 115, 0.42);
+    --serif: Georgia, "Iowan Old Style", "Times New Roman", "Songti SC", "Noto Serif", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  a { color: var(--gold); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible,
+  button:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    border-bottom: 1px solid var(--line);
+    padding: 22px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .wordmark {
+    font-family: var(--serif);
+    font-size: 19px;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+  }
+  .wordmark .sub {
+    display: block;
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-top: 3px;
+  }
+
+  .langs { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; }
+  .langs a { color: var(--muted); }
+  .langs a:hover { color: var(--gold); }
+  .langs a[aria-current="page"] { color: var(--gold); }
+
+  /* ---------- hero ---------- */
+
+  .hero { padding: 76px 0 60px; }
+
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin: 0 0 22px;
+  }
+
+  .hook {
+    font-family: var(--serif);
+    font-size: clamp(38px, 7vw, 68px);
+    line-height: 1.08;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    margin: 0 0 26px;
+    max-width: 15ch;
+  }
+  .hook em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .lede {
+    font-size: 19px;
+    color: var(--muted);
+    max-width: 56ch;
+    margin: 0 0 34px;
+  }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+
+  .btn {
+    display: inline-block;
+    padding: 13px 26px;
+    border-radius: 3px;
+    font-size: 15px;
+    letter-spacing: 0.01em;
+    border: 1px solid var(--gold);
+    background: var(--gold);
+    color: #101a26;
+    font-weight: 600;
+  }
+  .btn:hover { text-decoration: none; background: #e5c187; border-color: #e5c187; }
+
+  .btn.ghost {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--line);
+    font-weight: 400;
+  }
+  .btn.ghost:hover { border-color: var(--gold-dim); color: var(--gold); background: transparent; }
+
+  .fineprint {
+    margin: 22px 0 0;
+    font-size: 13px;
+    color: var(--dim);
+  }
+
+  /* ---------- sections ---------- */
+
+  section { padding: 64px 0; border-top: 1px solid var(--line); }
+  section:first-of-type { border-top: 0; }
+
+  .sechead { margin-bottom: 38px; max-width: 62ch; }
+  .sechead h2 {
+    font-family: var(--serif);
+    font-size: clamp(26px, 3.6vw, 36px);
+    font-weight: 400;
+    line-height: 1.2;
+    margin: 0 0 14px;
+    letter-spacing: -0.01em;
+  }
+  .sechead p { margin: 0; color: var(--muted); font-size: 16px; }
+
+  .eyebrow2 {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 12px;
+  }
+
+  /* ---------- feature cards ---------- */
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+
+  .card {
+    background: var(--bg2);
+    padding: 34px 30px 36px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card .num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+  }
+  .card h3 {
+    font-family: var(--serif);
+    font-size: 23px;
+    font-weight: 400;
+    line-height: 1.25;
+    margin: 0 0 14px;
+  }
+  .card p { margin: 0 0 16px; color: var(--muted); font-size: 15px; }
+  .card p:last-child { margin-bottom: 0; }
+  .card .tag {
+    display: inline-block;
+    margin-top: auto;
+    padding-top: 20px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    color: var(--gold);
+  }
+
+  /* ---------- layers ---------- */
+
+  .layers {
+    display: grid;
+    grid-template-columns: 1fr 1.35fr;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 760px) {
+    .layers { grid-template-columns: 1fr; gap: 34px; }
+  }
+
+  .layers svg { width: 100%; height: auto; display: block; }
+
+  .layerlist { list-style: none; margin: 0; padding: 0; }
+  .layerlist li {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    gap: 16px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: baseline;
+  }
+  .layerlist li:first-child { border-top: 1px solid var(--line); }
+  .layerlist .lid {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--gold);
+    letter-spacing: 0.04em;
+  }
+  .layerlist .lname { font-size: 15.5px; }
+  .layerlist .ldesc { display: block; color: var(--dim); font-size: 13.5px; margin-top: 2px; }
+
+  /* ---------- prose columns ---------- */
+
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 40px; }
+  .cols p { color: var(--muted); font-size: 15.5px; }
+  .cols p:first-child { margin-top: 0; }
+  .cols strong { color: var(--ink); font-weight: 600; }
+
+  /* ---------- card shop ---------- */
+
+  .keepsake {
+    border: 1px solid var(--line);
+    background: var(--bg2);
+    padding: 40px 36px;
+    max-width: 720px;
+  }
+  .keepsake h3 {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 400;
+    margin: 0 0 8px;
+  }
+  .keepsake .price {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--gold);
+    letter-spacing: 0.06em;
+    margin: 0 0 22px;
+  }
+  .keepsake p { color: var(--muted); font-size: 15.5px; }
+  .keepsake ul { color: var(--muted); font-size: 15.5px; padding-left: 20px; }
+  .keepsake li { margin-bottom: 9px; }
+  .keepsake .cta { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+
+  .note {
+    border-left: 2px solid var(--gold-dim);
+    padding: 4px 0 4px 18px;
+    color: var(--muted);
+    font-size: 15px;
+    margin: 26px 0 0;
+  }
+
+  /* ---------- faq ---------- */
+
+  .faq { max-width: 72ch; }
+  .faq details {
+    border-bottom: 1px solid var(--line);
+    padding: 20px 0;
+  }
+  .faq summary {
+    cursor: pointer;
+    font-family: var(--serif);
+    font-size: 19px;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: baseline;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; font-family: var(--mono); color: var(--dim); font-size: 17px; }
+  .faq details[open] summary::after { content: "\2212"; }
+  .faq details p { margin: 14px 0 0; color: var(--muted); font-size: 15.5px; }
+
+  /* ---------- creator block ---------- */
+
+  .creator {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 760px) { .creator { grid-template-columns: 1fr; gap: 30px; } }
+
+  .filelist { list-style: none; margin: 0; padding: 0; font-family: var(--mono); font-size: 13px; }
+  .filelist li {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .filelist li span:last-child { color: var(--dim); font-family: var(--sans); font-size: 13px; text-align: right; }
+
+  /* ---------- footer ---------- */
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 46px 0 60px;
+    color: var(--dim);
+    font-size: 13.5px;
+  }
+  footer .fmark {
+    font-family: var(--serif);
+    color: var(--muted);
+    font-size: 16px;
+    display: block;
+    margin-bottom: 10px;
+  }
+  footer p { max-width: 66ch; margin: 0 0 10px; }
+  footer .flinks { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 20px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <div class="masthead">
+    <span class="wordmark">A Date with Chongqing
+      <span class="sub">The 8D City</span>
+    </span>
+    <nav class="langs" aria-label="Language">
+      <a href="/landing.html" aria-current="page">English</a>
+      <a href="/?lang=zh">中文</a>
+      <a href="/?lang=ja">日本語</a>
+      <a href="/?lang=ko">한국어</a>
+      <a href="/?lang=es">Español</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== HERO ===================== -->
+  <div class="wrap">
+    <div class="hero">
+      <p class="eyebrow">A life simulator · Free · Play in your browser</p>
+      <h1 class="hook">One life.<br>One city.<br><em>No re-rolls.</em></h1>
+      <p class="lede">
+        Chongqing is the only 8D city on Earth. One building can be a metro station,
+        a shopping mall, a market and a river view at the same time, and the city
+        runs from underground all the way to the rooftops. This is a life simulator
+        set there — and the floor you live on decides your life.
+      </p>
+      <div class="actions">
+        <a class="btn" href="https://8dchongqing.cn/">Play it now</a>
+        <a class="btn ghost" href="#how">How it works</a>
+      </div>
+      <p class="fineprint">
+        No download. No account. No ads. Nothing you can buy changes an outcome.
+      </p>
+    </div>
+  </div>
+
+  <!-- ===================== THREE PILLARS ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="sechead">
+        <p class="eyebrow2">The game in three parts</p>
+        <h2>You do not get to pick your life. You get to live it.</h2>
+      </div>
+
+      <div class="cards">
+        <article class="card">
+          <div class="num">01</div>
+          <h3>A city with eight floors</h3>
+          <p>
+            Chongqing is built vertically. Its districts run from semi-basement rooms
+            carved out of air-raid shelters, through riverside stilt houses and flats
+            under a bridge approach, up through the old stair-terrace neighbourhoods,
+            the 1990s blocks with lifts, the high-rise towers and finally the rooftops.
+          </p>
+          <p>
+            Eight layers, L0 to L7, each with its own housing forms, its own rent and
+            its own way of getting through a day.
+          </p>
+          <span class="tag">8 vertical layers · 37 districts</span>
+        </article>
+
+        <article class="card">
+          <div class="num">02</div>
+          <h3>Which floor you live on decides everything</h3>
+          <p>
+            Your birthplace is drawn for you, weighted by real birth counts across
+            Chongqing's 37 districts. What you choose is the floor.
+          </p>
+          <p>
+            That single choice rewrites your commute, your rent, your stamina, your
+            health, your relationships and the ending you get. Live at L0 and you are
+            in a bunker room with no window. Live at L7 and the whole river is yours,
+            in an oven in August.
+          </p>
+          <span class="tag">The floor is the build</span>
+        </article>
+
+        <article class="card">
+          <div class="num">03</div>
+          <h3>A life you cannot reset</h3>
+          <p>
+            You are born, you work, and a handful of times something is genuinely
+            yours to decide — whether to follow your parents when they move, whether
+            to take the job, whether to keep carrying it when your body asks you to
+            stop. After each one, you live with it, all the way to the end.
+          </p>
+          <p>
+            When it ends you get a life card and a link. Anyone who opens that link
+            sees the exact life you lived.
+          </p>
+          <span class="tag">Deterministic · shareable · replayable</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== THE EIGHT LAYERS ===================== -->
+  <section id="how">
+    <div class="wrap">
+      <div class="sechead">
+        <p class="eyebrow2">The eight layers</p>
+        <h2>Eight ways to live in one city</h2>
+        <p>
+          Every layer is a different set of buildings, a different rent, a different
+          commute and a different body. Read a layer before you pick it.
+        </p>
+      </div>
+
+      <div class="layers">
+        <svg viewBox="0 0 320 460" role="img" aria-labelledby="layerchart-title layerchart-desc">
+          <title id="layerchart-title">The eight vertical layers of Chongqing, from L0 underground to L7 rooftop</title>
+          <desc id="layerchart-desc">A vertical cross-section of a city with eight labelled levels: L0 Underground, L1 River Level, L2 Bridge Level, L3 Street Level, L4 Stair Level, L5 Residential, L6 Tower, L7 Rooftop.</desc>
+
+          <!-- street level: the ground plane sits at the L3 band, above the layers below it.
+               Label is rotated into the left gutter so the bars never cover it. -->
+          <line x1="8" y1="270" x2="312" y2="270" stroke="#92a5ba" stroke-width="1" opacity="0.45"/>
+          <text x="17" y="270" fill="#6d8098" font-family="ui-monospace, monospace" font-size="9" letter-spacing="1.4"
+                text-anchor="middle" transform="rotate(-90 17 270)">STREET LEVEL</text>
+          <line x1="8" y1="412" x2="312" y2="412" stroke="#92a5ba" stroke-width="1" opacity="0.28" stroke-dasharray="4 4"/>
+          <text x="8" y="428" fill="#6d8098" font-family="ui-monospace, monospace" font-size="10" letter-spacing="1.4">RIVER</text>
+
+          <!-- L0 -->
+          <g>
+            <rect x="52" y="366" width="216" height="36" fill="#16243a" stroke="#3d5570" stroke-width="1"/>
+            <text x="64" y="389" fill="#e9eff7" font-family="Georgia, serif" font-size="13">L0 · Underground</text>
+            <text x="256" y="389" fill="#6d8098" font-family="ui-monospace, monospace" font-size="9.5" text-anchor="end">no window</text>
+          </g>
+          <!-- L1 -->
+          <g>
+            <rect x="38" y="328" width="244" height="36" fill="#16243a" stroke="#3d5570" stroke-width="1"/>
+            <text x="50" y="351" fill="#e9eff7" font-family="Georgia, serif" font-size="13">L1 · River Level</text>
+            <text x="270" y="351" fill="#6d8098" font-family="ui-monospace, monospace" font-size="9.5" text-anchor="end">flood season</text>
+          </g>
+          <!-- L2 -->
+          <g>
+            <rect x="52" y="290" width="216" height="36" fill="#16243a" stroke="#3d5570" stroke-width="1"/>
+            <text x="64" y="313" fill="#e9eff7" font-family="Georgia, serif" font-size="13">L2 · Bridge Level</text>
+            <text x="256" y="313" fill="#6d8098" font-family="ui-monospace, monospace" font-size="9.5" text-anchor="end">traffic overhead</text>
+          </g>
+          <!-- L3 -->
+          <g>
+            <rect x="30" y="252" width="260" height="36" fill="#16243a" stroke="#3d5570" stroke-width="1"/>
+            <text x="42" y="275" fill="#e9eff7" font-family="Georgia, serif" font-size="13">L3 · Street Level</text>
+            <text x="278" y="275" fill="#6d8098" font-family="ui-monospace, monospace" font-size="9.5" text-anchor="end">shops below</text>
+          </g>
+          <!-- L4 -->
+          <g>
+            <rect x="46" y="214" width="228" height="36" fill="#16243a" stroke="#3d5570" stroke-width="1"/>
+            <text x="58" y="237" fill="#e9eff7" font-family="Georgia, serif" font-size="13">L4 · Stair Level</text>
+            <text x="262" y="237" fill="#6d8098" font-family="ui-monospace, monospace" font-size="9.5" text-anchor="end">ninety steps</text>
+          </g>
+          <!-- L5 -->
+          <g>
+            <rect x="34" y="176" width="252" height="36" fill="#16243a" stroke="#3d5570" stroke-width="1"/>
+            <text x="46" y="199" fill="#e9eff7" font-family="Georgia, serif" font-size="13">L5 · Residential</text>
+            <text x="274" y="199" fill="#6d8098" font-family="ui-monospace, monospace" font-size="9.5" text-anchor="end">the standard floor</text>
+          </g>
+          <!-- L6 -->
+          <g>
+            <rect x="26" y="138" width="268" height="36" fill="#16243a" stroke="#3d5570" stroke-width="1"/>
+            <text x="38" y="161" fill="#e9eff7" font-family="Georgia, serif" font-size="13">L6 · Tower</text>
+            <text x="282" y="161" fill="#6d8098" font-family="ui-monospace, monospace" font-size="9.5" text-anchor="end">river view, all that wind</text>
+          </g>
+          <!-- L7 -->
+          <g>
+            <rect x="44" y="100" width="232" height="36" fill="#16243a" stroke="#d8b273" stroke-width="1"/>
+            <text x="56" y="123" fill="#e9eff7" font-family="Georgia, serif" font-size="13">L7 · Rooftop</text>
+            <text x="264" y="123" fill="#d8b273" font-family="ui-monospace, monospace" font-size="9.5" text-anchor="end">the scarcest address</text>
+          </g>
+
+          <!-- towers above rooftop -->
+          <g opacity="0.4">
+            <rect x="196" y="58" width="18" height="42" fill="#16243a" stroke="#3d5570" stroke-width="1"/>
+            <rect x="222" y="70" width="14" height="30" fill="#16243a" stroke="#3d5570" stroke-width="1"/>
+            <rect x="242" y="50" width="20" height="50" fill="#16243a" stroke="#3d5570" stroke-width="1"/>
+          </g>
+
+          <!-- spine -->
+          <line x1="160" y1="46" x2="160" y2="404" stroke="#3d5570" stroke-width="1" stroke-dasharray="3 5" opacity="0.7"/>
+          <text x="160" y="30" fill="#d8b273" font-family="ui-monospace, monospace" font-size="10.5" text-anchor="middle" letter-spacing="1.6">L0 — L7</text>
+        </svg>
+
+        <ul class="layerlist">
+          <li><span class="lid">L0</span><span class="lname">Underground<span class="ldesc">Bunkers and converted parking bays. No air in summer, no sun at all.</span></span></li>
+          <li><span class="lid">L1</span><span class="lname">River Level<span class="ldesc">Riverside stilt houses. River wind and ship horns; the ground floor takes water in flood season.</span></span></li>
+          <li><span class="lid">L2</span><span class="lname">Bridge Level<span class="ldesc">Flats under a bridge approach. Cars overhead all night, but the rent holds down.</span></span></li>
+          <li><span class="lid">L3</span><span class="lname">Street Level<span class="ldesc">Shops on the ground, homes above. You can buy cigarettes without going out.</span></span></li>
+          <li><span class="lid">L4</span><span class="lname">Stair Level<span class="ldesc">The old neighbourhoods. Even the ground floor is fifty steps above the street.</span></span></li>
+          <li><span class="lid">L5</span><span class="lname">Residential<span class="ldesc">The standard lifted block. Nothing special, nothing wrong. The safe bet.</span></span></li>
+          <li><span class="lid">L6</span><span class="lname">Tower<span class="ldesc">High-rise floors. You can see the river and the bridges, and the wind will not let you keep the window open.</span></span></li>
+          <li><span class="lid">L7</span><span class="lname">Rooftop<span class="ldesc">The top floor. An oven in summer, a wind tunnel in winter — and the whole river is yours alone.</span></span></li>
+        </ul>
+      </div>
+
+      <p class="note">
+        Each layer has its own page with the housing forms, the rent and the daily
+        reality of living there — for example
+        <a href="https://8dchongqing.cn/life/L4.html">L4 · Stair Level</a>,
+        <a href="https://8dchongqing.cn/life/L0.html">L0 · Underground</a> and
+        <a href="https://8dchongqing.cn/life/L7.html">L7 · Rooftop</a>.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===================== WHAT HAPPENS ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="sechead">
+        <p class="eyebrow2">What actually happens</p>
+        <h2>A whole life, played out, and then closed</h2>
+      </div>
+
+      <div class="cols">
+        <div>
+          <p><strong>You are born somewhere you did not choose.</strong> The birthplace is
+            drawn from real birth data across Chongqing's 37 districts. There is no menu
+            and no reroll — which is the first thing the game is trying to teach you.</p>
+          <p>You will be a child in someone else's city, and you will find out what that
+            feels like before the game explains anything.</p>
+        </div>
+        <div>
+          <p><strong>You work, and you get tired.</strong> Stamina, rent, health and money
+            move year by year. The floor sets the terms: a walk-up block is different from
+            a tower with a lift, and both are different from a fourth-floor room above a
+            shop.</p>
+          <p>Six people orbit you — a neighbour, a colleague, a relative, the landlord,
+            a child, and the old man opposite. They are not numbers with names; they are
+            people who show up.</p>
+        </div>
+        <div>
+          <p><strong>Seven times, something is genuinely yours.</strong> Each of those
+            moments has several real answers and every one of them costs you something
+            different. Choose, then live with it for the rest of the run.</p>
+          <p>At the end you get a life card: a vertical cross-section of Chongqing with
+            your own trajectory drawn across it, and a link that opens your exact life for
+            anyone who clicks it.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== KEEPSAKE ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="sechead">
+        <p class="eyebrow2">Optional</p>
+        <h2>The commemorative card</h2>
+        <p>
+          The game is free, permanently, for everyone. The card is not a key — it is a
+          keepsake of the life you actually lived.
+        </p>
+      </div>
+
+      <div class="keepsake">
+        <h3>A Date with Chongqing — Commemorative Card</h3>
+        <p class="price">USD $9 · PayPal · one-off</p>
+        <p>
+          Your card carries the same details the game already knows: your year of birth,
+          your district, your layer and your floor number, drawn as a code-generated
+          print with a unique serial in the form <span style="font-family:var(--mono); font-size:13.5px;">CQ-8D-XXXX-XXXX</span>.
+        </p>
+        <ul>
+          <li><strong>Digital card</strong> — generated and available in the browser
+            straight after payment, with your serial number, downloadable and shareable
+            as an image.</li>
+          <li><strong>Physical card</strong> — the same card, printed and posted to you.
+            Request it from the in-game form; we collect only the address we need to
+            mail it.</li>
+          <li><strong>It changes nothing about the game.</strong> No extra floors, no
+            better endings, no unlocks. There is nothing to unlock. Every life and every
+            ending is already reachable for free.</li>
+        </ul>
+        <div class="cta">
+          <a class="btn" href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&amp;business=404435105@qq.com&amp;item_name=A%20Date%20with%20Chongqing%20Commemorative%20Card&amp;amount=9&amp;currency=USD">Buy the card · $9</a>
+          <a class="btn ghost" href="https://8dchongqing.cn/">Just play the free game</a>
+        </div>
+        <p class="note">
+          Payment is handled by PayPal in a standard hosted checkout — no account on this
+          site is required, and none is created. If the payment page does not load for
+          you, the free game needs no payment at all.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CREATORS ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="sechead">
+        <p class="eyebrow2">For creators</p>
+        <h2>Stream it, record it, and keep what you earn</h2>
+        <p>
+          You are free to stream, record and publish gameplay of this game — including
+          on monetised channels. No permission form, no approval, no waiting, no revenue
+          share. Two asks only: put a link to the game in your description, and call it
+          a life simulator.
+        </p>
+      </div>
+
+      <div class="creator">
+        <div>
+          <p style="color:var(--muted); font-size:15.5px; margin-top:0;">
+            Everything you need is in one download: the logo, the title card and
+            screenshots in the sizes you actually use.
+          </p>
+          <ul class="filelist">
+            <li><span>cq-logo-512.png</span><span>512×512 · avatar, watermark</span></li>
+            <li><span>cq-logo.svg</span><span>vector · scale freely</span></li>
+            <li><span>cq-titlecard-1920x1080.png</span><span>intro / end card</span></li>
+            <li><span>cq-titlecard.svg</span><span>vector title card</span></li>
+            <li><span>screenshots/</span><span>landing, room, life</span></li>
+            <li><span>CREATOR-LICENSE.md</span><span>the full terms</span></li>
+          </ul>
+          <p style="margin-top:28px;">
+            <a class="btn" href="https://8dchongqing.cn/creators/README.md">Download the creator pack</a>
+          </p>
+          <p class="fineprint">
+            Also read: <a href="https://8dchongqing.cn/creators/CREATOR-LICENSE.md">the creator licence</a>.
+          </p>
+        </div>
+
+        <div>
+          <h3 style="font-family:var(--serif); font-weight:400; font-size:22px; margin:0 0 14px;">How to use it</h3>
+          <p style="color:var(--muted); font-size:15.5px; margin-top:0;">
+            Download the pack, then record. If you want the video to land, mention the
+            floor — it is the hook. Most viewers who do not hear about it will assume a
+            generic stat-heavy life simulator. The floor is what makes it not one.
+          </p>
+          <p style="color:var(--muted); font-size:15.5px;">
+            If you are creating in Nigeria, West Africa or anywhere else, play and
+            narrate in the language you think in — Nigeria English or Pidgin included.
+            The audience for this is much larger in the voice people actually speak in,
+            and the game is short enough that the language is never the thing standing
+            between a viewer and the first click.
+          </p>
+          <p style="color:var(--muted); font-size:15.5px;">
+            You may also translate the game's own on-screen text as part of your video,
+            edit it, add commentary, a facecam, your own music, or put it inside a
+            roundup. All of that is fine.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FAQ ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="sechead">
+        <p class="eyebrow2">Questions</p>
+        <h2>Frequently asked</h2>
+      </div>
+
+      <div class="faq">
+        <details>
+          <summary>Is the game free?</summary>
+          <p>
+            Yes, and it stays free. There is no account, no subscription, no
+            advertisement, no timer and no paywall. Open the link in any modern browser
+            and play. It works on a phone and it works on a laptop.
+          </p>
+        </details>
+
+        <details>
+          <summary>Why are you asking for $9 if the game is free?</summary>
+          <p>
+            The $9 is not for access to the game. It is for a commemorative card — a
+            physical or digital keepsake printed with the details of the life you
+            actually lived: your year, your district, your layer, your floor, and a
+            unique serial number. If you never buy it, nothing about the game changes
+            and you lose nothing at all.
+          </p>
+        </details>
+
+        <details>
+          <summary>What exactly is the commemorative card?</summary>
+          <p>
+            It is a card with the same information the game already shows you at the end
+            of a life, laid out as a print. The digital version is generated in the
+            browser after payment, with your serial number, and you can download or share
+            it as an image. The physical version is the same design, printed and posted
+            to an address you give us. We use that address for nothing else.
+          </p>
+        </details>
+
+        <details>
+          <summary>Does paying unlock anything?</summary>
+          <p>
+            No. There is nothing to unlock. Every layer, every ending and every choice
+            is already available to every player for free, and paying cannot buy a
+            better outcome, a different birthplace or a different ending.
+          </p>
+        </details>
+
+        <details>
+          <summary>Can I really not choose where I am born?</summary>
+          <p>
+            Correct. The birthplace is drawn for you, weighted by real birth counts
+            across Chongqing's 37 districts. You choose the floor. That is the only
+            build choice, and it is a large one.
+          </p>
+        </details>
+
+        <details>
+          <summary>Can I replay or reset a life?</summary>
+          <p>
+            Not your own — the whole point is that a life happens once, from birth to
+            death. What you can do is send the link you get at the end to someone else.
+            They will open the exact same life: same seed, same choices, same ending.
+            That is the only way to "reroll" it, and it is somebody else's job.
+          </p>
+        </details>
+
+        <details>
+          <summary>Which languages is it in?</summary>
+          <p>
+            English, 中文, 日本語, 한국어 and Español. You can switch with the language
+            menu at the top of the game, or open the game directly in a given language
+            using the links at the top of this page.
+          </p>
+        </details>
+
+        <details>
+          <summary>Can I stream or record it and make money from it?</summary>
+          <p>
+            Yes. You are free to stream, record and publish gameplay, including on
+            monetised channels, with no permission form and no revenue share. The only
+            two asks are that a link to the game appears in your description and that
+            you call it a life simulator. Assets are in the free creator pack.
+          </p>
+        </details>
+
+        <details>
+          <summary>Is this based on a real place?</summary>
+          <p>
+            The city is real: the districts, the eight vertical layers and the housing
+            forms are drawn from how Chongqing is actually built. The simulation is a
+            model built on real statistics, not a claim of historical accuracy. It is
+            a life simulator, not a documentary.
+          </p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="fmark">A Date with Chongqing — The 8D City</span>
+    <p>One life. One city. No re-rolls. A free life simulator set in Chongqing, China.</p>
+    <p>
+      Built as a solo project. Chongqing's districts, vertical layering and housing
+      forms are real; the simulation is a model of a life, not a claim of accuracy.
+    </p>
+    <div class="flinks">
+      <a href="https://8dchongqing.cn/">Play the game</a>
+      <a href="https://8dchongqing.cn/creators/README.md">Creator pack</a>
+      <a href="https://8dchongqing.cn/creators/CREATOR-LICENSE.md">Creator licence</a>
+      <a href="https://8dchongqing.cn/life/L4.html">Life on L4</a>
+      <a href="https://8dchongqing.cn/life/L7.html">Life on L7</a>
+      <a href="https://8dchongqing.cn/?lang=zh">中文</a>
+      <a href="https://8dchongqing.cn/?lang=ja">日本語</a>
+      <a href="https://8dchongqing.cn/?lang=ko">한국어</a>
+      <a href="https://8dchongqing.cn/?lang=es">Español</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

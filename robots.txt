@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /test/
+
+Sitemap: https://8dchongqing.cn/sitemap.xml

@@ -1,0 +1,3 @@
+# Cloudflare Pages / Netlify redirects
+# 未知路径统一走 404 页
+/life/*  /404.html  404
