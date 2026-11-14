@@ -22,3 +22,8 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
+      # 这一步才是真正把 artifact 发布出去 ——
+      # 少了它，artifact 上传成功但站点仍然是 404。
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
