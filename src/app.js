@@ -1116,7 +1116,14 @@
     var panel = el('div', 'lmpanelwrap');
     state.cityHost.appendChild(panel);
 
-    var view = new window.CQCITYVIEW.CityView(el('div', 'cityhostinner', ''), {
+    /* cityhostinner 必须先挂进 DOM 再交给 CityView。
+     * 之前是直接 new CityView(el('div', 'cityhostinner', ''), ...)，
+     * 那个 div 从来没被 append 到任何父节点 —— canvas 画在了
+     * 一个游离的节点上，页面上看不见整座城。
+     * 这就是「3D 山城不显示」的真正原因。 */
+    var cityInner = el('div', 'cityhostinner', '');
+    state.cityHost.appendChild(cityInner);
+    var view = new window.CQCITYVIEW.CityView(cityInner, {
       seed: state.seed || 20261114,
       landmarks: lms,
       onLandmark: function (lm) { openLandmark(lm); }
