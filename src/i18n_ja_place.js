@@ -53,7 +53,7 @@ var CQI18N_PACK_JA_PLACE = {
   'bldg:newtower:name': '新築高層棟',
   'bldg:newtower:note': 'エレベーター、管理会社、地下駐車場。この都市でいちばん「重慶らしくない」住まい方。',
   'bldg:oldslab:name': '古い団地',
-  'bldg:oldslab:note': '斜面に沿って建ち、棟と棟の間には数十から数百もの石段がある。一階に住んでいても、外に出るには坂を登らなければならない。重慶いちばん常识に逆らうところだ。',
+  'bldg:oldslab:note': '斜面に沿って建ち、棟と棟の間には数十から数百もの石段がある。一階に住んでいても、外に出るには坂を登らなければならない。重慶いちばん常識に逆らうところだ。',
   'bldg:penthouse:name': '最上階ペントハウス',
   'bldg:penthouse:note': '最上階三室、屋根は片流れ。夏はオーブン、冬は風穴、街のすべてが足元にある。',
   'bldg:railthrough:name': 'モノレール貫通棟',
