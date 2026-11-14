@@ -49,7 +49,7 @@
   function collectPacks() {
     ['JA', 'KO', 'ES'].forEach(function (code) {
       // 场景层包（i18n_ja_scene.js 等）也要收进来
-      ['CQI18N_PACK_' + code, 'CQI18N_PACK_' + code + '_SCENE', 'CQI18N_PEOPLE_' + code, 'CQI18N_CHOICES_' + code].forEach(function (name) {
+      ['CQI18N_PACK_' + code, 'CQI18N_PACK_' + code + '_SCENE', 'CQI18N_PEOPLE_' + code, 'CQI18N_CHOICES_' + code, 'CQI18N_PACK_' + code + '_PLACE'].forEach(function (name) {
         var src = root[name];
         if (!src) return;
         var lang = code.toLowerCase();

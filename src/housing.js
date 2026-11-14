@@ -38,7 +38,8 @@
       floorRange: [1, 2], layer: 'L1', layerCosts: true,
       noteZh: '下面架空支柱，上面住人。楼下是鸡圈、柴堆或者江水。一楼地势低，涨水先淹。',
       noteEn: 'Living space held up on posts; below is livestock, firewood, or the river. The ground floor floods first.',
-      src: '形态归纳：重庆沿江干打棚、吊脚楼普遍形态（沿江低层住区）'
+      src: '形态归纳：重庆沿江干打棚、吊脚楼普遍形态（沿江低层住区）',
+      srcEn: 'Pattern summary: the widespread stilt-house form along the Chongqing riverbank.'
     },
 
     /* 2. 苏式筒子楼：1953–1957 苏援时期，坡屋顶厚墙，一条长走廊串起许多单间 */
@@ -50,7 +51,8 @@
       floorRange: [1, 4], layer: 'L4', layerCosts: true,
       noteZh: '一条长走廊串着一排单间，厨房和厕所都是公用的。冬暖夏凉，墙厚得能挡住重庆的夏天。',
       noteEn: 'One long corridor strung with single rooms; kitchens and toilets shared. Thick walls keep the Chongqing summer out.',
-      src: '形态归纳：1953–1957 一五计划苏援项目苏式楼/筒子楼形态（赫鲁晓夫楼）'
+      src: '形态归纳：1953–1957 一五计划苏援项目苏式楼/筒子楼形态（赫鲁晓夫楼）',
+      srcEn: 'Pattern summary: Soviet-aid projects of the First Five-Year Plan, 1953-1957 - Soviet blocks and corridor dormitories.'
     },
 
     /* 3. 工人新村：五六十年代工厂宿舍，红砖三四层 */
@@ -62,7 +64,8 @@
       floorRange: [1, 4], layer: 'L4', layerCosts: true,
       noteZh: '红砖房，一幢挨一幢，走廊上搭炉子。二十来平米要住一家人，上下铺用布帘子隔开。',
       noteEn: 'Red brick, shoulder to shoulder, cooking stoves on the corridor. Twenty square metres for a whole family.',
-      src: '形态归纳：1950–1960 年代重庆工厂宿舍（工人新村：钢花村、模范村、嘉陵村等）形态'
+      src: '形态归纳：1950–1960 年代重庆工厂宿舍（工人新村：钢花村、模范村、嘉陵村等）形态',
+      srcEn: 'Pattern summary: factory dormitory compounds of the 1950s-60s (workers\' villages: Ganghuacun, Mofancun, Jialingcun and others).'
     },
 
     /* 4. 老旧小区：依山而建，梯坎密集——重庆住房的核心痛点 */
@@ -74,7 +77,8 @@
       floorRange: [1, 18], layer: 'L5', layerCosts: true,
       noteZh: '依山而建，楼栋之间是几十上百级梯坎。住一楼照样要爬坡出门——这是重庆最反常的地方。',
       noteEn: 'Built into the slope. Even the ground-floor residents climb steps to reach the street. The most counter-intuitive thing about Chongqing.',
-      src: '形态归纳：重庆 2000 年底前建成的城镇老旧小区普遍形态（依山而建、梯坎密集、一楼高出街面数十米）'
+      src: '形态归纳：重庆 2000 年底前建成的城镇老旧小区普遍形态（依山而建、梯坎密集、一楼高出街面数十米）',
+      srcEn: 'Pattern summary: pre-2000 urban housing compounds across Chongqing - built along the slope, dense with stairs, first floors tens of metres above the street.'
     },
 
     /* 5. 移民统建房：三峡移民安置，同户型大批量板楼 */
@@ -86,7 +90,8 @@
       floorRange: [1, 12], layer: 'L5', layerCosts: true,
       noteZh: '为了安置移民统一盖的楼，户型一样，楼层一样，隔音不好。离原来的老城有几公里。',
       noteEn: 'Identical units, identical floors, poor soundproofing, and several kilometres from the old town you left.',
-      src: '形态归纳：三峡库区移民统建房安置小区形态（1990s–2000s 集中建设）'
+      src: '形态归纳：三峡库区移民统建房安置小区形态（1990s–2000s 集中建设）',
+      srcEn: 'Pattern summary: resettlement housing for Three Gorges reservoir migrants, mass-built from the 1990s to the 2000s.'
     },
 
     /* 6. 新建高层：2000 年后商品房或安置房，带电梯 */
@@ -98,7 +103,8 @@
       floorRange: [1, 28], layer: 'L6', layerCosts: true,
       noteZh: '电梯、物业、地下车库。这是这座城市里最不「重庆」的一种住法。',
       noteEn: 'Lift, property management, underground parking. The least Chongqing way to live in Chongqing.',
-      src: '形态归纳：2000 年后重庆商品房与棚改安置房高层形态'
+      src: '形态归纳：2000 年后重庆商品房与棚改安置房高层形态',
+      srcEn: 'Pattern summary: post-2000 commodity housing and redeveloped high-rises across Chongqing.'
     }
   };
 
@@ -315,7 +321,8 @@
     floorRange: [1, 3], layer: 'L4', layerCosts: true,
     noteZh: '自己盖的房，三层，底层养牲口。跟工作隔着几十公里山，每天来回两个半小时。',
     noteEn: 'Your own three-storey house, livestock downstairs, and an hour and a half each way to work over the mountain.',
-    src: '形态归纳：重庆区县农村自建房（砖混或土木，底层养殖、上层自住）普遍形态'
+    src: '形态归纳：重庆区县农村自建房（砖混或土木，底层养殖、上层自住）普遍形态',
+    srcEn: 'Pattern summary: self-built houses in Chongqing\'s rural counties - brick or timber, with livestock below and the family living above.'
   };
 
   /* ---------- 装配：某个区县可选的住房选项 ---------- */

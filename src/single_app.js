@@ -244,6 +244,16 @@
     if (txt !== undefined && txt !== null) e.textContent = txt;
     return e;
   }
+
+  /* 地点类文案（层 / 楼型 / 地标）的三语取值 —— 见 cqcityview.js 同名函数。 */
+  function placeText(key, fallback) {
+    var lang = (window.CQSTATE && window.CQSTATE.lang) || 'en';
+    if (lang !== 'zh') {
+      var v = (window.CQI18N && window.CQI18N.t) ? window.CQI18N.t(key, lang) : null;
+      if (v) return v;
+    }
+    return fallback;
+  }
   function $(id) { return document.getElementById(id); }
   function scrollTop() { try { window.scrollTo(0, 0); } catch (e) {} }
 
@@ -346,8 +356,8 @@
       var lb = el('button', 'layerchip');
       lb.dataset.layer = k;
       lb.appendChild(el('span', 'lc-id', k));
-      lb.appendChild(el('span', 'lc-zh', state.lang === 'zh' ? L.zh : L.en));
-      lb.appendChild(el('span', 'lc-habit', state.lang === 'zh' ? L.habit : L.habitEn));
+      lb.appendChild(el('span', 'lc-zh', placeText('layer:' + k + ':name', L.en)));
+      lb.appendChild(el('span', 'lc-habit', placeText('layer:' + k + ':habit', L.habitEn)));
       lb.onclick = function () {
         state.pickLayer = k;
         Array.prototype.forEach.call(layerRow.children, function (c) { c.classList.remove('sel'); });
@@ -394,9 +404,13 @@
       var bw = el('button', 'bcard' + (oi === 0 ? ' sel' : ''));
       var range = opt.floorRange && opt.floorRange[0] !== opt.floorRange[1]
         ? opt.floorRange[0] + '–' + opt.floorRange[1] : String(opt.floors);
-      bw.appendChild(el('div', 'b-name', (state.lang === 'zh' ? opt.zh : opt.en) + ' · ' + range + U('楼')));
-      bw.appendChild(el('div', 'b-note', state.lang === 'zh' ? opt.noteZh : opt.noteEn));
-      bw.appendChild(el('div', 'b-src', opt.src));
+      bw.appendChild(el('div', 'b-name', placeText('bldg:' + String(opt.id).replace(/^d_/, '') + ':name', opt.en) + ' · ' + range + U('楼')));
+      bw.appendChild(el('div', 'b-note', placeText('bldg:' + String(opt.id).replace(/^d_/, '') + ':note', opt.noteEn)));
+      /* 来源说明（b-src）是中文考据注记。
+       * 单文件版只带英/西两种语言，不带 srcEn（英文版考据）——
+       * 那是站点版的额外体积。英文/西语界面下藏起来，
+       * 免得一条中文混在全西语界面里。 */
+      if (state.lang === 'zh') bw.appendChild(el('div', 'b-src', opt.src));
       bw.onclick = function () {
         Array.prototype.forEach.call(bwrap.querySelectorAll('.bcard'), function (c) { c.classList.remove('sel'); });
         bw.classList.add('sel');
@@ -822,7 +836,8 @@
     if (lms.length) {
       var chips = el('div', 'lmchips');
       lms.forEach(function (lm) {
-        var chip = el('button', 'lmchip', state.lang === 'zh' ? lm.zh : lm.en);
+        var chip = el('button', 'lmchip',
+          state.lang === 'zh' ? lm.zh : placeText('lm:' + lm.id + ':name', lm.en));
         chip.onclick = function () { openLandmark(lm); };
         chips.appendChild(chip);
       });

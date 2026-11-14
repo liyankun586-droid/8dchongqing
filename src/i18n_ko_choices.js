@@ -13,6 +13,8 @@ var CQI18N_CHOICES_KO = {
   'age5:grand:hint': '스스로 자라게 돼요.',
   'age5:board:text': '기숙 학교에서 지내기',
   'age5:board:hint': '일 년에 한 번, 집에 돌아가요.',
+  'age5:prompt': '우가의 일터가 시내과 군을 오가며 바뀝니다.',
+  'age5:prompt2': '우리는 군에 삽니다. 넉넉하지는 않지만, 우리 집 지붕은 있습니다.',
 
   /* ---- age15 ---- */
   'age15:title': '중학교 졸업 시험 결과가 났어요.',
@@ -60,6 +62,7 @@ var CQI18N_CHOICES_KO = {
   'age30:risk:hint': '이루면 판이 뒤집히고, 지면 밑천까지 날려요.',
   'age30:move:text': '중심 도시로 옮겨 가기',
   'age30:move:hint': '기회는 많은데, 임대료가 무서워요.',
+  'age30:prompt': '지금 하는 일은 {job}입니다. 십 년을 했으니, 남은 힘이 얼마나 되는지 알고 있습니다.',
 
   /* ---- age50 ---- */
   'age50:title': '자식이 커졌어요.',
@@ -71,6 +74,8 @@ var CQI18N_CHOICES_KO = {
   'age50:child_back:hint': '쌓아온 기술이 다음 사람에게 가요.',
   'age50:child_move:text': '그 아이 곁으로 옮겨 가기',
   'age50:child_move:hint': '인생의 후반, 새 곳에서 시작해요.',
+  'age50:prompt': '아이가 아직 충칭에 있나요, 아니면 이미 떠났나요?',
+  'age50:prompt2': '아이가 없습니다. 이 일은 오십이 되어서야 먹힙니다.',
 
   /* ---- age70 ---- */
   'age70:title': '일흐 살이에요.',

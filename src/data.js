@@ -112,49 +112,57 @@
         habitEn: 'Damp, airless, cheap',
         noteZh: '防空洞改的出租屋、地下车库隔出来的隔间。冬天不冷，夏天不透气。',
         noteEn: 'Bunkers and converted parking bays. No air in summer, no sun at all.',
-        src: '重庆山城地下空间改造的半地下室、裙楼居住形态' },
+        src: '重庆山城地下空间改造的半地下室、裙楼居住形态',
+        srcEn: 'Pattern summary: semi-basement and podium housing from Chongqing\'s hillside underground-space conversions.' },
       { id: 'L1', zh: '江面层', en: 'River Level',
         habit: '潮湿、吵、看得见江',
         habitEn: 'Damp, noisy, a view of the river',
         noteZh: '朝天门、菜园坝一带。推窗是江风，也是货轮汽笛。涨水时一楼会进水。',
         noteEn: 'Chaotianmen, Caibaoda. River wind and ship horns. In flood season the ground floor takes water.',
-        src: '朝天门码头区、沿江低层住区形态' },
+        src: '朝天门码头区、沿江低层住区形态',
+        srcEn: 'Pattern summary: low-rise riverside housing of the Chaotianmen wharf and riverbank districts.' },
       { id: 'L2', zh: '桥层', en: 'Bridge Level',
         habit: '车流声、灰、便宜',
         habitEn: 'Traffic noise, dust, cheap',
         noteZh: '桥头桥尾的第一二层。汽车从头顶过，晚上吵得睡不着，但租价压得住。',
         noteEn: 'The first two floors under a bridge approach. Cars overhead all night, but the rent holds down.',
-        src: '重庆桥梁引桥、匝道下低层住区形态' },
+        src: '重庆桥梁引桥、匝道下低层住区形态',
+        srcEn: 'Pattern summary: low-rise housing beneath bridge ramps and approach viaducts.' },
       { id: 'L3', zh: '街面层', en: 'Street Level',
         habit: '最方便、也最吵',
         habitEn: 'Most convenient, most noisy',
         noteZh: '一楼是商铺、二楼是住家。买根烟不用出门，睡觉要看卷帘门什么时候拉。',
         noteEn: 'Shops on the ground, homes above. You can buy cigarettes without going out.',
-        src: '重庆沿街商住混合楼形态（普遍为「下店上住」）' },
+        src: '重庆沿街商住混合楼形态（普遍为「下店上住」）',
+        srcEn: 'Pattern summary: mixed shop-and-residential blocks on Chongqing\'s commercial streets (shops below, homes above).' },
       { id: 'L4', zh: '梯坎层', en: 'Stair Level',
         habit: '重庆最经典的爬坡起点',
         habitEn: 'Where Chongqing starts climbing',
         noteZh: '街面往上第一段坡梯坎。出门就是长梯坎，扛着一箱牛奶爬完就喘。',
         noteEn: 'The first flight of stairs above the street. Carry a case of milk up and you are done for.',
-        src: '重庆梯坎密集的老城住区形态' },
+        src: '重庆梯坎密集的老城住区形态',
+        srcEn: 'Pattern summary: old-town walk-up housing built into Chongqing\'s dense stairways.' },
       { id: 'L5', zh: '居住层', en: 'Residential',
         habit: '标准层、绝大多数人住这儿',
         habitEn: 'The standard floor — where most people live',
         noteZh: '有电梯的老公房、老公房改造的套间。不好不坏，安全牌。',
         noteEn: 'The lifted 1990s block. Nothing special, nothing wrong. The safe bet.',
-        src: '1990–2010 年重庆主城标准住宅层' },
+        src: '1990–2010 年重庆主城标准住宅层',
+        srcEn: 'Standard residential floor typology of the Chongqing core, 1990-2010.' },
       { id: 'L6', zh: '塔楼层', en: 'Tower',
         habit: '视野好、风大、贵',
         habitEn: 'View, wind, price',
         noteZh: '二十层以上的高层塔楼。看得见江和桥，风大得关窗，物业费是楼下的三倍。',
         noteEn: 'High-rise tower floors. You can see the river and the bridges. The wind will not let you keep the window open.',
-        src: '重庆主城高层塔楼住区形态' },
+        src: '重庆主城高层塔楼住区形态',
+        srcEn: 'Pattern summary: high-rise tower housing in the Chongqing core districts.' },
       { id: 'L7', zh: '天台层', en: 'Rooftop',
         habit: '重庆最稀缺的位置',
         habitEn: 'The scarcest address in Chongqing',
         noteZh: '顶层。夏天像烤箱，冬天风灌进来；但整座城的江景归你一个人。',
         noteEn: 'The top floor. An oven in summer, a wind tunnel in winter — and the whole river is yours alone.',
-        src: '重庆顶层住宅（部分为坡顶阁楼、隔热层改造）' }
+        src: '重庆顶层住宅（部分为坡顶阁楼、隔热层改造）',
+        srcEn: 'Pattern summary: Chongqing top-floor housing (some with pitched-roof penthouses and retrofitted insulation decks).' }
     ],
     // P0 三个建筑原型，全部取自渝中区真实存在的建筑
     buildings: [
@@ -172,7 +180,8 @@
         noteEn: 'No lift. Three entrances at floors 1, 10 and 15, spanning a 38-metre drop.',
         noteZh: '无电梯，1/10/15 楼三个出入口，跨越 38 米高差。',
         fallbackType: 'gen_stairwell',
-        src: '白象居（1992 始建 / 1993 交付），24 层无电梯，38 米高差'
+        src: '白象居（1992 始建 / 1993 交付），24 层无电梯，38 米高差',
+        srcEn: 'Baixiangju (built 1992, delivered 1993): 24 floors, no lift, 38 metres of vertical span.'
       },
       {
         id: 'railthrough',
@@ -185,7 +194,8 @@
         layer: 'L3', layerCosts: false,
         noteEn: 'Rail passes through floors 6–8. Shops below, homes above.',
         noteZh: '轻轨穿 6–8 楼，楼下商铺、楼上住宅。',
-        src: '李子坝站：6 楼站厅 / 7 楼设备层 / 8 楼站台，每层约 3500㎡、空高 3.6m、与楼体间隔 20cm'
+        src: '李子坝站：6 楼站厅 / 7 楼设备层 / 8 楼站台，每层约 3500㎡、空高 3.6m、与楼体间隔 20cm',
+        srcEn: 'Liziba Station: concourse on floor 6, plant room on 7, platform on 8; about 3,500 sqm per floor, 3.6 m clear height, 20 cm gap to the building.'
       },
       {
         id: 'elevator',
@@ -198,7 +208,8 @@
         layer: 'L6', layerCosts: false,
         noteEn: 'A public lift climbs the cliff. Chongqing\'s other famous vertical route.',
         noteZh: '公共电梯直接爬坡，重庆另一条垂直生命线。',
-        src: '凯旋路电梯（1986），提升 32.5 米'
+        src: '凯旋路电梯（1986），提升 32.5 米',
+        srcEn: 'Kaixuan Road Elevator (1986): lifts 32.5 metres.'
       }
     ],
     // 按垂直层绑定的住区原型：让 8 层真的能住进去。
@@ -210,7 +221,8 @@
         floorRange: [1, 1],
         noteEn: 'A converted air-raid bunker. Half underground. Rent is a third of street level.',
         noteZh: '防空洞改的隔间，半层在地下。租金只有街面的三分之一，冬天不冷夏天不透气。',
-        src: '形态归纳：重庆半地下室、防空洞改造居住区普遍形态（非特定建筑）'
+        src: '形态归纳：重庆半地下室、防空洞改造居住区普遍形态（非特定建筑）',
+        srcEn: 'Pattern summary: semi-basement and air-raid-shelter conversions in Chongqing (not a specific building).'
       },
       {
         id: 'riverside', layer: 'L1', zh: '江边吊脚楼', en: 'Riverside stilt house',
@@ -218,7 +230,8 @@
         floorRange: [1, 3],
         noteEn: 'Three floors on the floodplain. The river is twenty steps away — and so is the ship horn.',
         noteZh: '江边三层，涨水时一楼要垫砖。推开窗就是江，汽笛整夜不停。',
-        src: '形态归纳：朝天门、菜园坝沿江低层住区普遍形态（非特定建筑）'
+        src: '形态归纳：朝天门、菜园坝沿江低层住区普遍形态（非特定建筑）',
+        srcEn: 'Pattern summary: low-rise riverside housing at Chaotianmen and Caiyuanba (not a specific building).'
       },
       {
         id: 'underbridge', layer: 'L2', zh: '桥下铺', en: 'Under-the-bridge flat',
@@ -226,7 +239,8 @@
         floorRange: [1, 2],
         noteEn: 'Under a bridge approach. Cars pass over your bed. The rent is almost nothing.',
         noteZh: '引桥下面。汽车从头顶过，睡觉像睡在马路上。房租低到不可思议。',
-        src: '形态归纳：重庆桥梁引桥、匝道下低层住区普遍形态（非特定建筑）'
+        src: '形态归纳：重庆桥梁引桥、匝道下低层住区普遍形态（非特定建筑）',
+        srcEn: 'Pattern summary: low-rise housing under bridge ramps and approach viaducts in Chongqing (not a specific building).'
       },
       {
         id: 'shophouse', layer: 'L3', zh: '下店上住', en: 'Shop below, home above',
@@ -234,7 +248,8 @@
         floorRange: [1, 6],
         noteEn: 'A shop on the ground, homes above. Everything is downstairs. The roller shutter goes up at six.',
         noteZh: '一楼开铺，二楼住家。买烟不用出门，卷帘门早上六点哗啦一声拉开。',
-        src: '形态归纳：重庆沿街商住混合楼「下店上住」普遍形态（非特定建筑）'
+        src: '形态归纳：重庆沿街商住混合楼「下店上住」普遍形态（非特定建筑）',
+        srcEn: 'Pattern summary: street-front mixed shop-and-residential blocks in Chongqing, shops below and homes above (not a specific building).'
       },
       {
         id: 'terrace', layer: 'L4', zh: '梯坎老楼', en: 'Stair-terrace block',
@@ -242,7 +257,8 @@
         floorRange: [1, 7],
         noteEn: 'The classic Chongqing walk-up. Seven flights, one entrance, and the street is forty steps below you.',
         noteZh: '重庆最经典的老步梯房。七层一个出入口，街面在四十级梯坎下面。',
-        src: '形态归纳：重庆主城 1980s–1990s 梯坎步梯楼普遍形态（参照白象居同型，非特定建筑）'
+        src: '形态归纳：重庆主城 1980s–1990s 梯坎步梯楼普遍形态（参照白象居同型，非特定建筑）',
+        srcEn: 'Pattern summary: terraced walk-up buildings of the 1980s-90s Chongqing core, on the same stair-stepped pattern as Baixiangju (not a specific building).'
       },
       {
         id: 'block1990', layer: 'L5', zh: '千禧老公房', en: 'Millennium block',
@@ -250,7 +266,8 @@
         floorRange: [1, 18],
         noteEn: 'A 2000s block with a lift and a security guard. The middle of the road, and that is exactly the point.',
         noteZh: '千禧年前后的电梯房，有保安有物业。不上不下，安全牌。',
-        src: '形态归纳：2000–2010 年重庆主城标准高层住宅普遍形态（非特定建筑）'
+        src: '形态归纳：2000–2010 年重庆主城标准高层住宅普遍形态（非特定建筑）',
+        srcEn: 'Pattern summary: standard mid-to-high-rise housing built in the Chongqing core, 2000-2010 (not a specific building).'
       },
       {
         id: 'tower', layer: 'L6', zh: '江景塔楼', en: 'River-view tower',
@@ -258,7 +275,8 @@
         floorRange: [1, 32],
         noteEn: 'A river-view tower. The service charge is triple, and the skyline is yours from the twentieth floor.',
         noteZh: '江景塔楼。物业费是楼下三倍，二十层以上整座城的江景归你。',
-        src: '形态归纳：重庆主城江景高层塔楼住区普遍形态（非特定建筑）'
+        src: '形态归纳：重庆主城江景高层塔楼住区普遍形态（非特定建筑）',
+        srcEn: 'Pattern summary: riverside-view tower housing in the Chongqing core (not a specific building).'
       },
       {
         id: 'penthouse', layer: 'L7', zh: '顶层阁楼', en: 'Top-floor penthouse',
@@ -266,7 +284,8 @@
         floorRange: [30, 33],
         noteEn: 'The top three floors, under a sloped roof. An oven in summer, a wind tunnel in winter, and the whole city below.',
         noteZh: '顶层三间，坡顶。夏天烤箱冬天风洞，整座城在脚下。',
-        src: '形态归纳：重庆顶层坡顶住宅普遍形态（非特定建筑）'
+        src: '形态归纳：重庆顶层坡顶住宅普遍形态（非特定建筑）',
+        srcEn: 'Pattern summary: pitched-roof top-floor housing across Chongqing (not a specific building).'
       }
     ],
     // 非渝中区（P0 铺满 37 区县时用）的通用原型
@@ -279,7 +298,8 @@
         layer: 'L4', layerCosts: false,
         noteEn: 'A 1990s high-rise with no lift and three entrances. Half the neighbours know your name.',
         noteZh: '九十年代高层步梯楼，无电梯，三个出入口，邻居都认得你。',
-        src: '通用原型（主城 1990–2000 年代步梯高层，形态参照白象居）'
+        src: '通用原型（主城 1990–2000 年代步梯高层，形态参照白象居）',
+        srcEn: 'Generic typology: 1990-2000s walk-up high-rises of the Chongqing core, following the Baixiangju pattern.'
       },
       {
         id: 'gen_walkup',
@@ -289,7 +309,8 @@
         layer: 'L4', layerCosts: false,
         noteEn: 'A 1980s walk-up. Seven flights, no lift, one entrance.',
         noteZh: '八十年代步梯房，七层无电梯，一个出入口。',
-        src: '通用原型（主城渝东北/渝东南常见）'
+        src: '通用原型（主城渝东北/渝东南常见）',
+        srcEn: 'Generic typology: common in the north-east and south-east counties of Chongqing.'
       },
       {
         id: 'gen_tower',
@@ -298,7 +319,8 @@
         floors: 26, lift: true, entrances: [1], heightM: 78,
         noteEn: 'A modern tower. Lift works, but the ground is 38 metres above the river.',
         noteZh: '现代塔楼，电梯可靠，但地面离江面三十八米。',
-        src: '通用原型（两江新区/主城新区常见）'
+        src: '通用原型（两江新区/主城新区常见）',
+        srcEn: 'Generic typology: common in the Liangjiang New Area and the newer core districts.'
       }
     ],
     src: '重庆市公开资料；李子坝站设计负责人叶天义公开说明；人民网/央广网 2014'

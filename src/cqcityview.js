@@ -16,6 +16,18 @@
     return e;
   }
 
+  /* 地点类文案（层 / 楼型 / 地标）的三语取值。
+   * 翻译包（i18n_{ja,ko,es}_place.js）→ 英文原文回退。
+   * 这个模块不依赖 app.js 的闭包，所以自己实现一份取值。 */
+  function placeText(key, fallback) {
+    var lang = (root.CQSTATE && root.CQSTATE.lang) || 'en';
+    if (lang !== 'zh') {
+      var v = (root.CQI18N && root.CQI18N.t) ? root.CQI18N.t(key, lang) : null;
+      if (v) return v;
+    }
+    return fallback;
+  }
+
   /* ================================================================
    * 3D 山城视图
    * ================================================================ */
@@ -141,7 +153,9 @@
     this.host.innerHTML = '';
     if (!lm) return;
     var head = el('div', 'lmhead');
-    head.appendChild(el('h3', 'lmtitle', L === 'zh' ? lm.zh : lm.en));
+    /* 地标名三语：翻译包 → 英文原文 → 中文。 */
+    var lmName = placeText('lm:' + lm.id + ':name', lm.en);
+    head.appendChild(el('h3', 'lmtitle', L === 'zh' ? lm.zh : lmName));
     head.appendChild(el('div', 'lmsub', L === 'zh' ? lm.en : lm.zh));
     var close = el('button', 'lmclose', '×');
     close.onclick = function () { self.close(); };
@@ -154,6 +168,7 @@
     var blurb = lm.blurbEn;
     if (L === 'zh') blurb = lm.blurbZh || lm.blurbEn;
     else if (L === 'es') blurb = lm.blurbEs || lm.blurbEn;
+    else blurb = placeText('lm:' + lm.id + ':blurb', lm.blurbEn);
     this.host.appendChild(el('p', 'lmblurb', blurb));
 
     /* 标签：数据集里字段名是单数 tag（不是 tags）。

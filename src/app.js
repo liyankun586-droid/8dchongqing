@@ -339,10 +339,16 @@
 
     var card = el('div', 'birthcard');
     var qnames = ['q', 'q2', 'q3', 'q4', 'q5'];
+    /* 只显示当前语言的那一份。之前是「中文 / 英文」并排，
+     * 于是西语界面里会冒出中文区县名和中文家庭类型。
+     * 中文界面保留拼音（districtEn）作辅助，因为那是英文名不是拉丁转写，
+     * 但英文/日/韩/西界面一律只显示英文那一份。 */
+    var districtLabel = state.lang === 'zh' ? (b.district + ' / ' + b.districtEn) : b.districtEn;
+    var familyLabel = state.lang === 'zh' ? (b.familyZh + ' / ' + b.familyEn) : b.familyEn;
     [
       [T('born') + ' ' + state.birthYear, ''],
-      [T('district'), b.district + ' / ' + b.districtEn],
-      [T('family'), b.familyZh + ' / ' + b.familyEn],
+      [T('district'), districtLabel],
+      [T('family'), familyLabel],
       [T('sex'), b.sex === 'm' ? T('male') : T('female')],
       [T('quintile'), T(qnames[b.incomeQuintile])],
       [T('urban') + ' / ' + T('rural'), b.urban ? T('urban') : T('rural')]
@@ -378,9 +384,12 @@
     // 区县说明：让玩家知道这个区县的住房长什么样
     var dNote = (window.CQHOUSING && window.CQHOUSING.districtNote) ?
       window.CQHOUSING.districtNote(b.district) : null;
+    /* 区县说明：中文版是考据注记，英文版也在数据里。
+     * 非中文语言显示英文原文 —— 不能让全西语界面里冒出一条中文，
+     * 但也不该把信息整条藏起来。 */
     if (dNote) {
       var dbox = el('div', 'districtnote');
-      dbox.appendChild(el('div', 'dn-zh', dNote.zh));
+      dbox.appendChild(el('div', 'dn-zh', state.lang === 'zh' ? dNote.zh : dNote.en));
       app.appendChild(dbox);
     }
 
@@ -392,8 +401,8 @@
       var lb = el('button', 'layerchip');
       lb.dataset.layer = k;
       lb.appendChild(el('span', 'lc-id', k));
-      lb.appendChild(el('span', 'lc-zh', state.lang === 'zh' ? L.zh : L.en));
-      lb.appendChild(el('span', 'lc-habit', state.lang === 'zh' ? L.habit : L.habitEn));
+      lb.appendChild(el('span', 'lc-zh', placeText('layer:' + k + ':name', L.en)));
+      lb.appendChild(el('span', 'lc-habit', placeText('layer:' + k + ':habit', L.habitEn)));
       lb.onclick = function () {
         state.pickLayer = k;
         Array.prototype.forEach.call(layerRow.children, function (c) {
@@ -453,12 +462,18 @@
     }
     list.forEach(function (opt, oi) {
       var bw = el('button', 'bcard' + (oi === 0 ? ' sel' : ''));
-      bw.appendChild(el('div', 'b-name', (state.lang === 'zh' ? opt.zh : opt.en) +
+      /* 区县形态的 opt.id 带 d_ 前缀（'d_' + f.id），翻译包里的键是纯形态 id。
+       * 所以取键时要剥掉前缀，否则永远查不到译文。 */
+      var formKey = String(opt.id).replace(/^d_/, '');
+      bw.appendChild(el('div', 'b-name', placeText('bldg:' + formKey + ':name', opt.en) +
         (opt.floorRange && opt.floorRange[0] !== opt.floorRange[1]
           ? ' · ' + opt.floorRange[0] + '–' + opt.floorRange[1] + 'F'
           : ' · ' + opt.floors + 'F')));
-      bw.appendChild(el('div', 'b-note', state.lang === 'zh' ? opt.noteZh : opt.noteEn));
-      bw.appendChild(el('div', 'b-src', opt.src));
+      bw.appendChild(el('div', 'b-note', placeText('bldg:' + formKey + ':note', opt.noteEn)));
+      /* 来源说明（b-src）：中文版是考据注记，英文版也在数据里。
+       * 非中文语言显示英文原文 —— 不让中文混进全西语界面，
+       * 但也不把这条信息藏掉。 */
+      bw.appendChild(el('div', 'b-src', state.lang === 'zh' ? opt.src : (opt.srcEn || opt.src)));
       bw.onclick = function () {
         Array.prototype.forEach.call(bwrap.querySelectorAll('.bcard'),
           function (c) { c.classList.remove('sel'); });
@@ -735,11 +750,42 @@
    * 键 = 节点id:字段（title / prompt / <optionId>:text / <optionId>:hint） */
   function cText(id, fallback) {
     var lang = state.lang;
+    var out = null;
     if (lang !== 'zh') {
       var v = (window.CQI18N && window.CQI18N.t) ? window.CQI18N.t(id, lang) : null;
+      if (v) out = v;
+    }
+    if (out === null) out = fallback;
+    /* 占位替换：age30 的提示句里嵌了当前职业名。
+     * 规则侧是运行时字符串拼接（'你现在做的是' + jn + '。...'），
+     * 翻译包里用 {job} 占位 —— 这里把它替换成当前职业的本地化名称，
+     * 否则玩家会看到字面的 {job}。 */
+    if (typeof out === 'string' && out.indexOf('{job}') >= 0) {
+      out = out.replace(/\{job\}/g, currentJobName());
+    }
+    return out;
+  }
+
+  /* 地点类文案（层 / 楼型 / 地标）的三语取值。
+   * data.js / housing.js / landmarks.js 里的文案只有 zh/en，
+   * 日/韩/西玩家看到的是英文 —— 这里用翻译包补上。
+   * 找不到译文时回退到传入的 fallback（通常是英文原文）。 */
+  function placeText(key, fallback) {
+    if (state.lang !== 'zh') {
+      var v = (window.CQI18N && window.CQI18N.t) ? window.CQI18N.t(key, state.lang) : null;
       if (v) return v;
     }
     return fallback;
+  }
+
+  /* 当前职业名（按语言取；没有职业就退回通用说法） */
+  function currentJobName() {
+    var st = state.life && state.life.st;
+    var j = st && st.job;
+    if (!j) return state.lang === 'zh' ? '这份工作' : 'this job';
+    if (state.lang === 'zh') return j.zh || j.en || '这份工作';
+    var tr = (window.CQI18N && window.CQI18N.t) ? window.CQI18N.t('job:' + j.id, state.lang) : null;
+    return tr || j.en || j.zh || 'this job';
   }
 
   /* 显示抉择面板 */
@@ -750,7 +796,10 @@
     var box = el('div', 'choicebox');
     box.appendChild(el('div', 'choice-age', d.age + T('age')));
     box.appendChild(el('h3', 'choice-title', cText(d.id + ':title', state.lang === 'zh' ? d.titleZh : d.titleEn)));
-    box.appendChild(el('div', 'choice-prompt', cText(d.id + ':prompt', state.lang === 'zh' ? d.promptZh : d.promptEn)));
+    /* promptKey：有的抉择提示有两种情况（规则里是三元），
+     * 翻译包按分支给不同键。没有 promptKey 的节点照常用 <id>:prompt。 */
+    var pKey = d.promptKey || (d.id + ':prompt');
+    box.appendChild(el('div', 'choice-prompt', cText(pKey, state.lang === 'zh' ? d.promptZh : d.promptEn)));
 
     var opts = el('div', 'choiceopts');
     d.options.forEach(function (o) {
@@ -866,8 +915,10 @@
       state.hud.appendChild(grid);
 
       var meta = el('div', 'hud-meta');
+      /* 职业名走 currentJobName()：它在 ja/ko/es 下会读 job:<id> 翻译包，
+       * 直接读 st.job.en 会让日韩西玩家看到英文职业名。 */
       meta.appendChild(el('span', null, t('工作', 'Work') + ': ' +
-        (st.job ? (state.lang === 'zh' ? st.job.zh : st.job.en) : '—')));
+        (st.job ? currentJobName() : '—')));
       meta.appendChild(el('span', null, t('住', 'Home') + ': ' + st.homeFloor + 'F'));
       meta.appendChild(el('span', null, t('净资产', 'Net') + ': ' +
         (Math.round(st.money / 10000) / 10) + t('万', 'w')));
@@ -1030,7 +1081,8 @@
       list.appendChild(lh);
       var chips = el('div', 'lmchips');
       lms.forEach(function (lm) {
-        var chip = el('button', 'lmchip', state.lang === 'zh' ? lm.zh : lm.en);
+        var chip = el('button', 'lmchip',
+          state.lang === 'zh' ? lm.zh : placeText('lm:' + lm.id + ':name', lm.en));
         chip.onclick = function () { openLandmark(lm); };
         chips.appendChild(chip);
       });

@@ -246,7 +246,7 @@
           heightM: f.heightM, floorRange: f.floorRange,
           layer: f.layer, layerCosts: f.layerCosts,
           rentMult: f.rentMult,
-          noteZh: f.noteZh, noteEn: f.noteEn, src: f.src,
+          noteZh: f.noteZh, noteEn: f.noteEn, src: f.src, srcEn: f.srcEn,
           // 区县形态的额外信息：这是本区县的典型住法
           districtForm: true
         });
@@ -590,6 +590,8 @@
     return {
       id: 'age5', age: 5,
       titleZh: '爸妈要搬家了，你跟谁走？', titleEn: 'Your parents are moving. Where do you go?',
+      /* promptKey：提示句有两支（城里 / 区县），翻译包按分支给不同键。 */
+      promptKey: st.livingUrban ? 'age5:prompt' : 'age5:prompt2',
       promptZh: st.livingUrban
         ? '你家的活儿在主城和区县之间换来换去。'
         : '你家在区县，日子不宽裕，但有个屋顶。',
@@ -826,6 +828,7 @@
     return {
       id: 'age50', age: 50,
       titleZh: '孩子大了。', titleEn: 'Your child is grown.',
+      promptKey: st.children === 0 ? 'age50:prompt2' : 'age50:prompt',
       promptZh: st.children === 0
         ? '你没有孩子。这件事到了五十岁才算数。'
         : '孩子在重庆，还是已经走了？',

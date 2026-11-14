@@ -13,6 +13,8 @@ var CQI18N_CHOICES_ES = {
   'age5:grand:hint': 'Te criarás por tu cuenta.',
   'age5:board:text': 'Te mandan a un colegio interno',
   'age5:board:hint': 'Vuelves a casa una vez al año.',
+  'age5:prompt': 'El trabajo de tu familia alterna entre el centro y los condados.',
+  'age5:prompt2': 'Viven en un condado. No sobra nada, pero hay un techo.',
 
   /* ---- age15 ---- */
   'age15:title': 'Ya salieron las notas del examen.',
@@ -60,6 +62,7 @@ var CQI18N_CHOICES_ES = {
   'age30:risk:hint': 'O te enriqueces, o lo pierdes todo.',
   'age30:move:text': 'Cambiar de casa y mudarte a la ciudad',
   'age30:move:hint': 'Más oportunidades, y un alquiler que asusta.',
+  'age30:prompt': 'Llevas una década haciendo de {job}. Sabes exactamente cuánta fuerza te queda.',
 
   /* ---- age50 ---- */
   'age50:title': 'Tu hijo ya es mayor.',
@@ -71,6 +74,8 @@ var CQI18N_CHOICES_ES = {
   'age50:child_back:hint': 'El oficio no se muere contigo.',
   'age50:child_move:text': 'Mudarte a la ciudad donde viva tu hijo',
   'age50:child_move:hint': 'Un lugar nuevo para los últimos años.',
+  'age50:prompt': '¿Tu hijo sigue en Chongqing o ya se ha ido?',
+  'age50:prompt2': 'No tienes hijos. Eso solo cuenta a los cincuenta.',
 
   /* ---- age70 ---- */
   'age70:title': 'Setenta años.',
