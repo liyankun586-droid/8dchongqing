@@ -1580,7 +1580,10 @@
       trunk.position.set(c.x + (rr() - 0.5) * 4, c.y + 2.5 * s, c.z + (rr() - 0.5) * 4);
       trunk.castShadow = true;
       group.add(trunk);
-      var leaf = new THREE.Mesh(new THREE.IcosahedronGeometry(3.4 * s, 0), leafMat);
+      /* 树冠：detail 0 的正二十面体只有 20 个平面三角形 ——
+       * 夜景下每个面的明暗差都显形，读成「排列规整的三角形面片」。
+       * detail 1 = 80 个面，轮廓还是低模感，但面片小到读不出来。 */
+      var leaf = new THREE.Mesh(new THREE.IcosahedronGeometry(3.4 * s, 1), leafMat);
       leaf.position.set(trunk.position.x, c.y + 5.6 * s, trunk.position.z);
       leaf.scale.set(1, 0.82, 1);
       leaf.castShadow = true;
@@ -1888,8 +1891,11 @@
         M.brick.emissiveIntensity = night ? 0.34 : 0.0;
         M.stiltWood.emissiveIntensity = night ? 0.60 : 0.0;
         M.roof.emissiveIntensity = night ? 0.08 : 0.0;
-        M.ground.emissiveIntensity = night ? 0.05 : 0.0;
-        M.rock.emissiveIntensity = 0.0;   /* 崖壁永远不自发光 */
+        /* 夜景山体不能是纯黑剪影 —— 评审：「夜景山体完全黑，
+         * 与天空同为黑蓝，没有任何内部层次」。
+         * 崖壁和地面给一点极弱的自发光，只用来托出层次，不做光源感。 */
+        M.ground.emissiveIntensity = night ? 0.16 : 0.0;
+        M.rock.emissiveIntensity = night ? 0.13 : 0.0;
         M.concrete.color.setHex(P.concrete);
         M.glass.color.setHex(P.glass);
         M.oldWood.color.setHex(P.oldWood);
@@ -1916,14 +1922,17 @@
          * 画面上就没有明暗梯度，山体读成黑纸剪影。
          * 评审第十二轮：「从背光面到受光面几乎同一个值」。
          * 修法：白天大幅压低半球光，把亮度交给方向光。 */
-        hemi.intensity = night ? 2.2 : 0.95;
+        hemi.intensity = night ? 2.9 : 0.95;
         hemi.color.set(night ? 0x5a7ba8 : 0xbcd8f5);
         hemi.groundColor.set(night ? 0x141c2c : 0x6a7280);
         moon.intensity = night ? 2.2 : 0.25;
         sun.intensity = night ? 0.0 : 4.6;
         cityGlow.intensity = night ? 4.2 : 0.6;
         riverGlow.intensity = night ? 2.8 : 0.4;
-        warmFill.intensity = night ? 0.45 : 0.5;
+        warmFill.intensity = night ? 0.85 : 0.5;
+        /* 夜景山体层次：城市辉光方向的定向光，让山腰吃到暖色，
+         * 背光面不至于和天空同一个值 */
+        rim.intensity = night ? 0.85 : 0.55;
         renderer.toneMappingExposure = night ? 1.75 : 1.0;
       }
 
@@ -1946,6 +1955,33 @@
       }
       window.addEventListener('resize', resize);
       resize();
+
+      /* 太阳跟随相机 —— 展示型渲染的常规做法。
+       * 评审：「太阳方位让相机正对的那一面成了背光面」。
+       * 固定的世界坐标太阳，只能在某个机位好看；跟着相机走，
+       * 无论转到哪个角度，正对镜头的那面都是受光面，形体永远读得出来。
+       * 太阳保持在相机视线的**左后方**，形成稳定的明暗面。 */
+      var sunFollowTarget = new THREE.Vector3();
+      function updateSunFollow() {
+        /* 注视点：orbit 模式看 orbitCenter，walk/fly 看前方 */
+        if (mode === 'orbit') sunFollowTarget.copy(orbitCenter);
+        else {
+          sunFollowTarget.set(
+            pos.x - Math.sin(yaw) * 60,
+            pos.y,
+            pos.z - Math.cos(yaw) * 60);
+        }
+        var ang = Math.atan2(camera.position.x - sunFollowTarget.x,
+                             camera.position.z - sunFollowTarget.z);
+        var off = ang + 2.35;         /* 左后方约 135° */
+        var r = 640;
+        sun.position.set(
+          sunFollowTarget.x + Math.sin(off) * r,
+          480,
+          sunFollowTarget.z + Math.cos(off) * r);
+        sun.target.position.set(sunFollowTarget.x, 60, sunFollowTarget.z);
+        sun.target.updateMatrixWorld();
+      }
 
       function tick() {
         raf = requestAnimationFrame(tick);
@@ -1994,6 +2030,9 @@
           camera.position.copy(pos);
           camera.rotation.set(pitch, yaw, 0, 'YXZ');
         }
+
+        /* 太阳跟随相机 —— 保证正对镜头的那面是受光面 */
+        updateSunFollow();
 
         /* 月光跟随玩家，保证阴影覆盖 */
         moon.position.set(pos.x - 320, pos.y + 420, pos.z - 260);
