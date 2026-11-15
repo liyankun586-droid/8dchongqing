@@ -1361,7 +1361,7 @@
       } else if (tag === 'hilltop-view') {
         buildHilltop(g, M, b, sc, rr);
       } else if (tag === 'cable-car') {
-        buildCableCar(g, M, b, sc, rr);
+        buildCableCar(g, M, b, sc, rr, groundAt);
       }
 
       group.add(g);
@@ -1640,7 +1640,12 @@
    *   两岸塔架 + 悬链线缆 + 沿缆滑行的吊厢。
    *   吊厢是圆角方舱（重庆索道是方舱，不是圆吊篮）。
    */
-  function buildCableCar(g, M, b, sc, rr) {
+  function buildCableCar(g, M, b, sc, rr, groundAt) {
+    /* 两塔必须踩在岸上，不能悬空。用地形高度函数把塔基拉到地面。 */
+    function landY(x, z) {
+      if (typeof groundAt === 'function') return groundAt(x, z);
+      return 0;
+    }
     var len = b.w;                 /* 跨江长度 */
     var H = 62;                    /* 塔架高度 —— 真实索道塔 40~70m */
     /* 缆索必须用**实体管**，不能用 THREE.Line。
@@ -1662,22 +1667,26 @@
 
     /* --- 两岸塔架 --- */
     [-1, 1].forEach(function (s) {
-      var x = s * len / 2;
+      /* 沿 **Z** 方向跨江 —— 长江是沿 X 的长带（X∈[-700,700], Z∈[112,532]），
+       * 缆索必须垂直于江岸，也就是沿 Z。
+       * 之前沿 X 建 → 缆索平行于江岸跑，根本不像跨江索道。 */
+      var z = s * len / 2;
+      var gy = landY(0, z);        /* 该处的地面高度 */
       /* 塔架：两腿 + 横梁 */
       [-1, 1].forEach(function (leg) {
         /* 塔腿做成上细下粗的锥柱 —— 混凝土格构塔的读感 */
         var p = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 1.5, H, 6), M.concrete);
-        p.position.set(x, H / 2, leg * 3.2);
+        p.position.set(leg * 3.2, gy + H / 2, z);
         p.castShadow = true;
         g.add(p);
       });
-      var beam = new THREE.Mesh(new THREE.BoxGeometry(3.4, 2.4, 9.5), M.concrete);
-      beam.position.set(x, H - 1.2, 0);
+      var beam = new THREE.Mesh(new THREE.BoxGeometry(9.5, 2.4, 3.4), M.concrete);
+      beam.position.set(0, gy + H - 1.2, z);
       beam.castShadow = true;
       g.add(beam);
       /* 塔顶鞍座 */
-      var saddle = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.4, 3.0), M.steelDark || M.concrete);
-      saddle.position.set(x, H + 0.6, 0);
+      var saddle = new THREE.Mesh(new THREE.BoxGeometry(3.0, 1.4, 4.2), M.concrete);
+      saddle.position.set(0, gy + H + 0.6, z);
       g.add(saddle);
     });
 
@@ -1687,9 +1696,13 @@
     /* 悬链线下垂：真实索道跨度 1000m 时垂度可达跨度的 1/10。
      * 这里跨度 170m，垂度取 0.30*H ≈ 19m —— 弧度必须能在剪影里看出来。 */
     var sag = H * 0.30;
+    /* 缆索两端锚在塔顶（塔顶高度 = 地面 + H），中间下垂 */
+    var yNorth = landY(0, -len / 2) + H;
+    var ySouth = landY(0, len / 2) + H;
     function cableY(u) {
       var k = 2 * u - 1;
-      return H - sag * (1 - k * k);
+      var base = yNorth + (ySouth - yNorth) * u;
+      return base - sag * (1 - k * k);
     }
     [-1, 1].forEach(function (side) {
       var curve = new THREE.CatmullRomCurve3(
@@ -1697,7 +1710,7 @@
           var ps = [];
           for (var i = 0; i <= 32; i++) {
             var u = i / 32;
-            ps.push(new THREE.Vector3(-len / 2 + len * u, cableY(u), side * 3.2));
+            ps.push(new THREE.Vector3(side * 3.2, cableY(u), -len / 2 + len * u));
           }
           return ps;
         })());
@@ -1713,9 +1726,9 @@
       var u = 0.12 + (c / nCab) * 0.76;
       var dir = (c % 2 === 0) ? 1 : -1;
       var cu = dir > 0 ? u : 1 - u;
-      var cx = -len / 2 + len * cu;
+      var cz = -len / 2 + len * cu;
       var cy = cableY(cu) - 5.2;
-      var cz = (c % 2 === 0 ? 3.2 : -3.2);
+      var cx = (c % 2 === 0 ? 3.2 : -3.2);
 
       var cab = new THREE.Group();
       cab.position.set(cx, cy, cz);
@@ -1723,13 +1736,13 @@
        * 不是圆吊篮也不是纯方盒。用 CapsuleGeometry 压扁做圆角方体，
        * 让几何签名可区分。 */
       var body = new THREE.Mesh(new THREE.CapsuleGeometry(3.8, 4.4, 4, 10), cabinMat);
-      body.rotation.z = Math.PI / 2;
+      body.rotation.x = Math.PI / 2;   /* 舱体长轴沿 Z（缆的方向） */
       body.scale.set(1.0, 1.0, 0.92);
       body.castShadow = true;
       cab.add(body);
       /* 舷窗带 */
       var win = new THREE.Mesh(new THREE.CapsuleGeometry(4.0, 1.8, 4, 10), glassMat);
-      win.rotation.z = Math.PI / 2;
+      win.rotation.x = Math.PI / 2;
       win.scale.set(1.0, 1.0, 0.92);
       win.position.y = 0.5;
       cab.add(win);
@@ -1746,14 +1759,15 @@
 
     /* --- 上下站房 --- */
     [-1, 1].forEach(function (s) {
-      var st = new THREE.Mesh(new THREE.BoxGeometry(16, 12, 12), M.brick);
-      st.position.set(s * (len / 2 + 6), 6, 0);
+      var sgz = s * (len / 2 + 6);
+      var st = new THREE.Mesh(new THREE.BoxGeometry(12, 12, 16), M.brick);
+      st.position.set(0, landY(0, sgz) + 6, sgz);
       st.castShadow = true; st.receiveShadow = true;
       g.add(st);
       var roof = new THREE.Mesh(new THREE.CylinderGeometry(7.5, 7.5, 14, 12, 1, false, 0, Math.PI), M.road);
       roof.rotation.z = Math.PI / 2;
       roof.rotation.y = Math.PI / 2;
-      roof.position.set(s * (len / 2 + 6), 12.6, 0);
+      roof.position.set(0, landY(0, sgz) + 12.6, sgz);
       g.add(roof);
     });
   }

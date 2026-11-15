@@ -106,7 +106,11 @@
       blurbEn: 'Opened in 1987, it crosses two kilometres of river from Xinhua Road to Shangxin Street. One car, one crossing, one view.',
       blurbZh: '一九八七年通车的过江索道，从新华路跨到上新街，单程一趟要过江两公里。',
       blurbEs: 'Abierto en 1987, cruza dos kilómetros de río desde Xinhua Road hasta Shangxin Street. Una cabina, un cruce, una vista.',
-      scene: { floors: 1, base: { x: 200, y: 0, z: 168, w: 170, d: 14, h: 48 },
+      /* 索道沿 Z 跨长江：长江带 Z∈[112,532]，中心 z=168。
+       * 跨距 260m → 两塔落在 z=38（北岸）与 z=298（江中偏南）。
+       * 真实长江索道是 2km 跨江、塔在两岸山头，这里取 260m 缩放版，
+       * 两端仍然在岸上（在江带内 20m），不会立在江心。 */
+      scene: { floors: 1, base: { x: 200, y: 0, z: 178, w: 260, d: 14, h: 48 },
                stilt: false, neon: 'cyan', riverSide: 'yangtze', facade: 'modern-tower', landmark: true }
     },
     {
