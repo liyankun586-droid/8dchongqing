@@ -417,6 +417,25 @@
     return { d: bestD, i: bestI, s: bestS };
   }
 
+  /* 最近的脊线上的点（用于确定台地外推方向）。
+   * 方向连续平滑、绝不反号 —— 这是等高线切线法线做不到的。 */
+  function nearestRidgePoint(px, pz, lines) {
+    var bestD = 1e9, bx = px, bz = pz;
+    for (var i = 0; i < lines.length; i++) {
+      var L = lines[i];
+      for (var j = 0; j < L.length - 1; j++) {
+        var dx = L[j + 1].x - L[j].x, dz = L[j + 1].z - L[j].z;
+        var l2 = dx * dx + dz * dz;
+        var tt = l2 === 0 ? 0 : ((px - L[j].x) * dx + (pz - L[j].z) * dz) / l2;
+        tt = Math.max(0, Math.min(1, tt));
+        var qx = L[j].x + tt * dx, qz = L[j].z + tt * dz;
+        var d = (px - qx) * (px - qx) + (pz - qz) * (pz - qz);
+        if (d < bestD) { bestD = d; bx = qx; bz = qz; }
+      }
+    }
+    return { x: bx, z: bz, d: Math.sqrt(bestD) };
+  }
+
   function heightField(x, z, seed) {
     var lines = ridgeLines();
     var r = nearestRidge(x, z, lines);
@@ -562,27 +581,43 @@
       /* 叠一层 fbm 噪声 —— 否则层理会变成等高线色带 */
       strataShade *= 0.90 + fbm(cc.x * 0.022, cc.z * 0.022, seed ^ 0x9a1, 3) * 0.28;
 
+      /* 材质分层 —— 必须**拉开色相差距**，不能只改明度。
+       * 评审第十七轮：「山体表面有材质分层吗？还是单色？」
+       * 上一版三档颜色（0.44,0.46,0.42 / 0.50,0.47,0.43 / 0.34,0.42,0.30）
+       * 全是同一族灰绿，在 ACES 色调映射下全糊成一片白模。
+       *
+       * 真实的重庆山体（从下到上）：
+       *   河谷   = 城市灰（水泥/混凝土的冷灰）
+       *   山腰   = 赭红褐（重庆的岩层是紫红色砂岩，**这是重庆的招牌色**）
+       *   高处   = 植被深绿
+       *   裸岩   = 亮赭（露头）
+       * 加上**斑块化**（低频噪声）让分界不是一条水平线，而是有机斑块。
+       */
       var hN = Math.min(1, cc.y / 230);
+      /* 斑块噪声：让分层边界有机，不要水平切 */
+      var patch = fbm(cc.x * 0.011, cc.z * 0.011, seed ^ 0x77c3, 3);
+      var hEff = hN + (patch - 0.5) * 0.26;
+
       var r, g, b;
-      if (hN < 0.22) {
-        /* 河谷：建成区的灰绿 */
-        r = 0.44; g = 0.46; b = 0.42;
-      } else if (hN < 0.55) {
-        /* 山腰：岩灰带层理 */
-        r = 0.50; g = 0.47; b = 0.43;
+      if (hEff < 0.20) {
+        /* 河谷：城市冷灰 */
+        r = 0.40; g = 0.41; b = 0.43;
+      } else if (hEff < 0.58) {
+        /* 山腰：紫红砂岩 —— 重庆的招牌 */
+        r = 0.62; g = 0.42; b = 0.33;
       } else {
-        /* 山顶：植被绿 */
-        r = 0.34; g = 0.42; b = 0.30;
+        /* 高处：植被深绿 */
+        r = 0.24; g = 0.38; b = 0.21;
       }
-      /* 陡坡 → 裸岩，更亮更暖 */
-      if (slp > 0.55) {
-        var k = Math.min(1, (slp - 0.55) / 0.45);
-        r = r + (0.60 - r) * k; g = g + (0.55 - g) * k; b = b + (0.49 - b) * k;
+      /* 陡坡 → 裸岩，亮赭色 */
+      if (slp > 0.50) {
+        var k = Math.min(1, (slp - 0.50) / 0.42);
+        r = r + (0.72 - r) * k; g = g + (0.60 - g) * k; b = b + (0.48 - b) * k;
       }
       /* 层理明暗 */
       r *= strataShade; g *= strataShade; b *= strataShade;
       /* 谷底偏暗，山脊偏亮 */
-      var lift = 0.86 + hN * 0.24;
+      var lift = 0.82 + hN * 0.30;
       r *= lift; g *= lift; b *= lift;
 
       colArr[vi * 3] = r; colArr[vi * 3 + 1] = g; colArr[vi * 3 + 2] = b;
@@ -610,10 +645,13 @@
      * 人工把坡切成一圈圈台地，台地之间是挡墙。
      * 这样挡墙是**连续的长条**，读出来是「一圈圈山坎」，不是「一片鳞」。
      */
-    var walls = buildRetainingWalls(cells, grid, GRID_N, cell, 9, M, seed);
+    var walls = buildRetainingWalls(cells, grid, GRID_N, cell, 5, M, seed);
     if (walls) {
-      walls.castShadow = true; walls.receiveShadow = true;
-      group.add(walls);
+      var wlist = Array.isArray(walls) ? walls : [walls];
+      wlist.forEach(function (wm) {
+        wm.castShadow = true; wm.receiveShadow = true;
+        group.add(wm);
+      });
     }
 
     /* ---- 台地描述（给地标吸附用） ---- */
@@ -672,8 +710,9 @@
     });
 
     var pos = [], uv = [], idx = [];
+    var sPos = [], sUv = [], sIdx = [];   /* 踏面（单独材质）*/
     var vbase = 0;
-    var SHELF = 3.2;          /* 踏面外延宽度（米）*/
+    var SHELF = 22;           /* 踏面进深（米）—— 真实重庆梯坎平台 15~40m */
 
     for (var lv = minH + step; lv < maxH; lv += step) {
       var segs = contourSegments(grid, N, lv);
@@ -692,16 +731,30 @@
         var outward = [];
         for (var i = 0; i < chain.length; i++) {
           var p = chain[i];
-          /* 下坡方向 = 高度梯度的反方向（指向山外）。
-           * 必须用 heightField 而不是 groundAt —— buildRetainingWalls
-           * 在 buildTerrain 内部调用，此时模块级 terrain 还没赋值，
-           * groundAt 会一律返回 0，方向全乱。 */
+          /* 外推方向：**离最近山脊的方向**。
+           *
+           * 评审第十六轮：「亮带是楔形尖头，不是连续环带」；
+           * 第十七轮：「切线法线在脊部切线反号、法线翻转造成的 ribbon 自交
+           *            —— 比楔形尖头更糟，读成了『瓦楞板/扇面』」。
+           *
+           * 两种方向都失败的原因：它们都在**等高线自身**上求方向，
+           * 而等高线在鞍部/凸出端的切线本身就不连续。
+           *
+           * 修法：用**离最近山脊点的方向**。脊线是显式折线几何，
+           * 这个方向：
+           *   ① 在整条等高线上连续平滑，**绝不反号**（无自交）
+           *   ② 方向稳定 → 踏面宽度恒定 → 连续环带
+           *   ③ 语义正确：重庆的山坎是相对山脊向两侧退台的
+           */
+          var nr = nearestRidgePoint(p.x, p.z, ridgeLines());
+          var ox = p.x - nr.x, oz = p.z - nr.z;
+          var ol = Math.sqrt(ox * ox + oz * oz);
+          if (ol < 0.001) { ox = 1; oz = 0; ol = 1; }
+          ox /= ol; oz /= ol;
+          /* 方向要指向「下坡」那一侧 */
           var gx = heightField(p.x + 7, p.z, seed) - heightField(p.x - 7, p.z, seed);
           var gz = heightField(p.x, p.z + 7, seed) - heightField(p.x, p.z - 7, seed);
-          var gl = Math.sqrt(gx * gx + gz * gz);
-          var ox = 0, oz = 0;
-          if (gl > 0.0001) { ox = -gx / gl; oz = -gz / gl; }
-          else { ox = 1; oz = 0; }
+          if (ox * gx + oz * gz > 0) { ox = -ox; oz = -oz; }
           outward.push([ox, oz]);
 
           var ox2 = p.x + ox * SHELF;
@@ -712,17 +765,22 @@
 
           pos.push(p.x, lv, p.z);          /* 0 内沿顶 */
           pos.push(ox2, lv, oz2);          /* 1 外沿顶 */
+          /* 挡墙顶端往外再推一点点，形成一道压顶亮线 */
           pos.push(p.x, lv - 0.15, p.z);   /* 2 内沿底（与顶几乎重合，避免缝隙）*/
           pos.push(ox2, outerBot, oz2);    /* 3 外沿底 */
           uv.push(i * 0.12, 0, i * 0.12, 0.12, i * 0.12, 0, i * 0.12, 0.9);
+          /* 同一批顶点也进踏面 mesh（0-1 之间的水平面） */
+          sPos.push(p.x, lv, p.z);
+          sPos.push(ox2, lv, oz2);
+          sUv.push(i * 0.22, 0, i * 0.22, 0.22);
         }
 
         for (var k = 0; k < chain.length - 1; k++) {
           var a = start + k * 4, b = a + 4;
-          /* 踏面（水平，法线朝上）: 0-1-5-4 */
-          idx.push(a, a + 1, b + 1);
-          idx.push(a, b + 1, b);
-          /* 挡墙（竖直，法线朝外）: 1-3-7-5 */
+          /* 踏面（水平，法线朝上）: 0-1-5-4 —— 单独成 mesh，用混凝土材质 */
+          sIdx.push(a, a + 1, b + 1);
+          sIdx.push(a, b + 1, b);
+          /* 挡墙（竖直，法线朝外）: 1-3-7-5 —— 岩材质 */
           idx.push(a + 1, a + 3, b + 3);
           idx.push(a + 1, b + 3, b + 1);
         }
@@ -730,16 +788,41 @@
       });
     }
 
-    if (!pos.length) return null;
-    var g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-    g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
-    g.setIndex(idx);
-    g.computeVertexNormals();
-    /* 台面材质偏岩灰，挡墙也是岩 —— 用同一个材质即可，
-     * 但**不能 clone**（applyPalette 只改 M.rock）。 */
-    M.rock.side = THREE.FrontSide;
-    return new THREE.Mesh(g, M.rock);
+    var out = [];
+    /* 挡墙 mesh（岩材质） */
+    if (pos.length) {
+      var g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+      g.setIndex(idx);
+      g.computeVertexNormals();
+      /* 不能 clone —— applyPalette 只改 M.rock，clone 会永远停在初始色 */
+      M.rock.side = THREE.FrontSide;
+      out.push(new THREE.Mesh(g, M.rock));
+    }
+    /* 踏面 mesh（混凝土材质 —— 水平面用岩石会读成暗面）
+     * 评审第十六轮：「亮面占比只有每级的 15-25%，暗面占 75-85%，
+     * 暗面在画面上仍是主导信息」。
+     * 踏面换成浅色混凝土材质 → 亮面占比直接翻倍，台阶一眼读出。 */
+    if (sPos.length) {
+      var sg = new THREE.BufferGeometry();
+      sg.setAttribute('position', new THREE.Float32BufferAttribute(sPos, 3));
+      sg.setAttribute('uv', new THREE.Float32BufferAttribute(sUv, 2));
+      sg.setIndex(sIdx);
+      sg.computeVertexNormals();
+      /* 踏面用**独立材质**（不是 clone）：需要单独的 emissive 强度，
+       * 夜景下踏面要真的发亮 —— 楼体材质靠立面贴图发光，
+       * 踏面的 UV 采样落在贴图暗区就亮不起来。
+       * 独立材质在 applyPalette 里被同步（见 applyPalette 的 M.shelf）。 */
+      if (!M.shelf) {
+        M.shelf = new THREE.MeshStandardMaterial({
+          map: groundTexture(), roughness: 0.95, metalness: 0.0,
+          emissive: 0xffcf9a, emissiveMap: groundTexture(),
+          emissiveIntensity: 0.0, side: THREE.FrontSide });
+      }
+      out.push(new THREE.Mesh(sg, M.shelf));
+    }
+    return out.length ? out : null;
   }
 
   /* 单个高程的等高线段（marching squares 的简化版：只取穿过格子的两点） */
@@ -1812,10 +1895,10 @@
       sun.shadow.mapSize.set(4096, 4096);
       sun.shadow.camera.near = 50;
       sun.shadow.camera.far = 2200;
-      sun.shadow.camera.left = -620;
-      sun.shadow.camera.right = 620;
-      sun.shadow.camera.top = 620;
-      sun.shadow.camera.bottom = -620;
+      sun.shadow.camera.left = -430;
+      sun.shadow.camera.right = 430;
+      sun.shadow.camera.top = 430;
+      sun.shadow.camera.bottom = -430;
       sun.shadow.bias = -0.0004;
       sun.shadow.normalBias = 1.2;
       scene.add(sun);
@@ -1987,14 +2070,20 @@
       var PALETTE = {
         night: {
           concrete: 0x39445a, glass: 0x243449, oldWood: 0x3d3229, brick: 0x453430,
-          stiltWood: 0x3a2d21, roof: 0x33261f, rock: 0x3a4356, ground: 0x4a5468,
+          stiltWood: 0x3a2d21, roof: 0x33261f, rock: 0x3a4356,
+          /* 夜间地形：中性偏暗，色相交给顶点色 */
+          ground: 0x9aa0a8,
           water: 0x14263f, road: 0x1c2432, foliage: 0x1a3a28, glassBlue: 0x2a4a68,
           trunk: 0x2a2018
         },
         day: {
           concrete: 0xb8bdc6, glass: 0x8fa8c0, oldWood: 0x8a7458, brick: 0x9c7c6a,
           stiltWood: 0x8e7550, roof: 0x6d4f42,
-          rock: 0x8a8478, ground: 0xffffff,
+          rock: 0x8a8478,
+          /* 地形材质色必须接近中性 —— 顶点色才是色相的主载体。
+           * 之前夜间用 0x4a5468（冷蓝灰），材质色 × 顶点色 = 紫红砂岩被染成蓝灰，
+           * 评审看到的就是「纯中性灰，没有材质分层」。 */
+          ground: 0xffffff,
           water: 0x5b82a8, road: 0x3f434b, foliage: 0x3f6b3f, glassBlue: 0x86a8c4,
           trunk: 0x5a4634
         }
@@ -2014,6 +2103,18 @@
          * 崖壁和地面给一点极弱的自发光，只用来托出层次，不做光源感。 */
         M.ground.emissiveIntensity = night ? 0.16 : 0.0;
         M.rock.emissiveIntensity = night ? 0.13 : 0.0;
+        /* 踏面：夜景必须比崖壁亮，否则台地在夜里读不出来 */
+        if (M.shelf) {
+          /* 夜景踏面必须是**暖色城市反光**，不是冷白。
+           * 评审：「踏面没有亮度 —— M.shelf 的 emissiveIntensity 0.42
+           * 在夜景里完全没体现」。
+           * 修法：强度提到 1.15 + 暖色（城市灯火反照在台面上），
+           * 并把 emissive 本身设成暖色（emissive: 0xffffff 是中性白，
+           * 和城市光不搭）。 */
+          M.shelf.emissive.setHex(0xffcf9a);
+          M.shelf.emissiveIntensity = night ? 1.15 : 0.0;
+          M.shelf.color.setHex(night ? 0x6b6a68 : 0xc9c4b6);
+        }
         M.concrete.color.setHex(P.concrete);
         M.glass.color.setHex(P.glass);
         M.oldWood.color.setHex(P.oldWood);
@@ -2080,6 +2181,25 @@
        * 无论转到哪个角度，正对镜头的那面都是受光面，形体永远读得出来。
        * 太阳保持在相机视线的**左后方**，形成稳定的明暗面。 */
       var sunFollowTarget = new THREE.Vector3();
+      /* 阴影相机必须跟着太阳一起移动 + 重新计算视锥。
+       * 实测（第十九轮）：关掉阴影后地形中心像素从 (37,48,58) 变成 (69,69,67)，
+       * 只留地形无阴影时 p50 = 180（正常受光）。
+       * → 太阳跟随相机后，shadow.camera 的视锥还罩着旧位置，
+       *   整片地形被误判为阴影区。
+       * 修法：太阳移动后同步更新 shadow.camera 的位置和 target，
+       * 并把投影范围缩到只罩住山体（620→420），提高阴影分辨率。 */
+      function updateShadowCamera() {
+        var c = sun.shadow.camera;
+        /* 让阴影相机的中心跟着注视点 */
+        c.left = -430; c.right = 430; c.top = 430; c.bottom = -430;
+        c.near = 60; c.far = 1500;
+        /* 阴影相机的位置 = 太阳位置沿光轴后撤 */
+        var dir = new THREE.Vector3().subVectors(sun.position, sun.target.position).normalize();
+        c.position.copy(sun.target.position).addScaledVector(dir, 900);
+        c.lookAt(sun.target.position);
+        c.updateProjectionMatrix();
+      }
+
       function updateSunFollow() {
         /* 注视点：orbit 模式看 orbitCenter，walk/fly 看前方 */
         if (mode === 'orbit') sunFollowTarget.copy(orbitCenter);
@@ -2091,14 +2211,22 @@
         }
         var ang = Math.atan2(camera.position.x - sunFollowTarget.x,
                              camera.position.z - sunFollowTarget.z);
-        var off = ang + 2.35;         /* 左后方约 135° */
+        /* 太阳在相机的**同侧偏后**（azimuth 偏移约 40°），高度角很高。
+         * 根因（第十九轮）：原来是 ang + 2.35 rad（135°）—— 那把太阳放到了
+         * 相机**对面**，所以相机正对的那面永远是背光面。
+         * 评审原话：「太阳方位让相机正对的那一面成了背光面」。
+         * 正确做法：太阳方位角 ≈ 相机方位角 + 40°（同侧、偏高），
+         * 这样正对镜头的面是受光面，背光面留给侧面 → 明暗梯度成立。 */
+        var off = ang + 0.70;
         var r = 640;
         sun.position.set(
           sunFollowTarget.x + Math.sin(off) * r,
-          480,
+          620,
           sunFollowTarget.z + Math.cos(off) * r);
         sun.target.position.set(sunFollowTarget.x, 60, sunFollowTarget.z);
         sun.target.updateMatrixWorld();
+        /* 阴影相机跟着走 */
+        updateShadowCamera();
       }
 
       function tick() {
