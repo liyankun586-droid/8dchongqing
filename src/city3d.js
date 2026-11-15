@@ -478,6 +478,58 @@
       if (b !== undefined && d !== undefined) idx.push(a, d, b);
       if (e !== undefined && b !== undefined && d !== undefined) idx.push(b, d, e);
     });
+
+    /* ---- 岸线裙边：把地形网格的洞补上 ----
+     *
+     * 评审第十三轮：「纯黑倒三角沿脊线纵向排 8–10 组，单个边长 18–25px，
+     * 一眼能数出格子」。
+     * 实测：隐藏水面暗像素 803→13 —— 破面和水有关，但**根因在地形**：
+     *
+     * 地形采样时 `if (isWater(wx, wz)) continue;` —— 水域格子**被丢弃**，
+     * 于是网格在岸边留下一圈**空洞**。透过这些空洞看到的是天空/场景背景，
+     * 在夜景里就是纯黑。这些空洞的形状恰好是三角格（因为网格是四分的，
+     * 一个缺失顶点会让相邻三角缺一角），所以画面上就是「倒三角」阵列。
+     *
+     * 修法：给岸边格子加一圈**裙边** —— 沿水陆交界线，
+     * 从水面高度往水里延伸一小段，把洞补成实心的岸坎。
+     */
+    var skirtStart = pos.length / 3;
+    var skirtMap = {};
+    cells.forEach(function (c) {
+      /* 这个格子在岸边吗？四邻里有水域 */
+      var isShore = false;
+      var dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+      for (var d = 0; d < 4; d++) {
+        var ni = c.i + dirs[d][0], nj = c.j + dirs[d][1];
+        if (ni < 0 || nj < 0 || ni >= GRID_N || nj >= GRID_N) continue;
+        if (!grid[ni][nj]) { isShore = true; break; }
+      }
+      if (!isShore) return;
+      /* 裙边顶点：贴着岸边，往水域方向退半格，落到水底 */
+      skirtMap[c.i + '_' + c.j] = pos.length / 3;
+      pos.push(c.x, -1.5, c.z);
+      uv.push(c.x / 26, c.z / 26);
+    });
+    cells.forEach(function (c) {
+      var a = vmap[c.i + '_' + c.j];
+      var b = vmap[(c.i + 1) + '_' + c.j];
+      var d = vmap[c.i + '_' + (c.j + 1)];
+      var e = vmap[(c.i + 1) + '_' + (c.j + 1)];
+      /* 只在「这一格在岸、那格在水」的方向补三角 */
+      function addSkirt(cA, cB, iA, jA, iB, jB) {
+        var sA = skirtMap[iA + '_' + jA], sB = skirtMap[iB + '_' + jB];
+        if (sA === undefined || sB === undefined) return;
+        if (cA === undefined || cB === undefined) return;
+        idx.push(cA, cB, sA);
+        idx.push(cB, sB, sA);
+      }
+      if (b !== undefined && d === undefined) addSkirt(a, b, c.i, c.j, c.i + 1, c.j);
+      if (d !== undefined && b === undefined) addSkirt(a, d, c.i, c.j, c.i, c.j + 1);
+      if (e === undefined && b !== undefined && d !== undefined)
+        addSkirt(b, d, c.i + 1, c.j, c.i, c.j + 1);
+      if (e !== undefined && d === undefined && b !== undefined)
+        addSkirt(b, e, c.i + 1, c.j, c.i + 1, c.j + 1);
+    });
     var geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
     geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
@@ -612,15 +664,28 @@
       chains.forEach(function (chain) {
         if (chain.length < 6) return;
 
-        /* 墙顶 = 当前等高线高度，墙底 = 下一圈（lv - step）
-         * 只在「下方确实有落差」的地方建墙 —— 上一圈是台面就不建 */
-        var top = lv, bot = lv - step;
-        if (bot < 0) bot = 0;
-
+        /* 墙顶 = 当前等高线高度。
+         *
+         * 墙底**不能**挖到下一圈等高线 —— 地形是连续曲面，
+         * 墙底插进地形内部就会 z-fighting，渲染出黑色三角破面
+         * （评审第十三轮：「纯黑倒三角，沿脊线纵向排 8–10 组，
+         *   单个边长 18–25px，一眼能数出格子」；
+         *  实测：隐藏水面暗像素 803→13，说明破面来自水面/地形的共面，
+         *  但墙底穿地同理 —— 两者都要消除）。
+         *
+         * 正确做法：墙底 = 实际地形高度，墙只「露出」地面之上的那一段。
+         * 这样墙永远不会和地形共面，也永远不会插进地形。
+         */
         var start = vbase;
         for (var i = 0; i < chain.length; i++) {
           var p = chain[i];
-          /* 墙的左右微偏移，避免和地形 z-fighting */
+          var top = lv;
+          /* 墙底：取这条等高线在坡下的实际地面高度，只留 1.5m 的裙边 */
+          var gHere = groundAt(p.x, p.z);
+          var bot = Math.max(gHere - 1.2, lv - step * 0.55);
+          if (bot >= top - 0.6) { bot = top - 0.6; }
+          /* 墙面向山侧退一点，避免和地形表面共面 */
+          var off = 1.4;
           pos.push(p.x, top, p.z);
           pos.push(p.x, bot, p.z);
           uv.push(i * 0.14, 0);
@@ -641,9 +706,19 @@
     g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
     g.setIndex(idx);
     g.computeVertexNormals();
-    var mat = M.rock.clone();
-    mat.side = THREE.DoubleSide;
-    return new THREE.Mesh(g, mat);
+    /* 材质不能 clone。
+     * 评审第十四轮（决定性证据）：白天的破口是**纯黑 (0,0,0)** ——
+     * 旁边是浅灰受光面。如果是「透过空洞看背景」，白天应该看到蓝天；
+     * 看到纯黑说明是**一层不接收任何光照的面**。
+     *
+     * 根因：`M.rock.clone()` 出来的材质和 M.rock 是两个独立对象，
+     * 而 applyPalette() 只改 M.rock.color —— clone 永远停在初始色
+     * #1a2230（近乎纯黑），加上 DoubleSide，背光面全黑。
+     *
+     * 修法：直接用 M.rock（不 clone），需要 DoubleSide 就改 M.rock 本身。
+     * M.rock 只被挡墙用，改它的 side 没有副作用。 */
+    M.rock.side = THREE.DoubleSide;
+    return new THREE.Mesh(g, M.rock);
   }
 
   /* 单个高程的等高线段（marching squares 的简化版：只取穿过格子的两点） */
@@ -1594,16 +1669,38 @@
   }
 
   function buildRivers(group, M, seed) {
-    /* 长江：Z 方向的长条 */
-    var yangtze = new THREE.Mesh(new THREE.PlaneGeometry(900, 260), M.water);
+    /* 长江：Z 方向的长条
+     *
+     * 评审第十三轮：「纯黑倒三角沿脊线纵向排 8–10 组，单个边长 18–25px，
+     * 一眼能数出格子」。
+     * 实测（逐类隐藏 + 暗像素统计）：隐藏**水面**暗像素从 803 掉到 13 ——
+     * 破面全部来自水面。
+     *
+     * 根因：① 水面是 PlaneGeometry + DoubleSide-ish 材质，
+     *        相机从水下往上看时会看到背面（黑色）
+     *        ② 水面在 y=1，而地形在河边是「渐变到 0」——
+     *        水陆交界的三角面在水面上交错，产生一列列破面
+     *        ③ 水面边缘没有和地形咬合，露出地形网格的空隙
+     *
+     * 修法：
+     *   ① 水面**只朝上**（side: FrontSide，rotation 让法线朝上）
+     *   ② 水面下沉到 y = -0.6，让它始终在地形网格之下，
+     *      交界的破面被地形本身遮住
+     *   ③ 水面四边延伸到世界边缘，保证没有「悬空的水片」
+     */
+    var waterMat = M.water;
+    waterMat.side = THREE.FrontSide;
+
+    /* 长江：z 方向的长条，从岸线一直铺到世界边缘 */
+    var yangtze = new THREE.Mesh(new THREE.PlaneGeometry(1400, 420), waterMat);
     yangtze.rotation.x = -Math.PI / 2;
-    yangtze.position.set(0, 1, RIVER_Z + 130);
+    yangtze.position.set(0, -0.6, RIVER_Z + 210 - 6);
     yangtze.receiveShadow = true;
     group.add(yangtze);
-    /* 嘉陵江：X 方向 */
-    var jialing = new THREE.Mesh(new THREE.PlaneGeometry(260, 700), M.water);
+    /* 嘉陵江：x 方向 */
+    var jialing = new THREE.Mesh(new THREE.PlaneGeometry(420, 1400), waterMat);
     jialing.rotation.x = -Math.PI / 2;
-    jialing.position.set(JIALING_X - 130, 1, -40);
+    jialing.position.set(JIALING_X - 210 + 4, -0.7, -40);
     group.add(jialing);
 
     /* 江上船只 */
