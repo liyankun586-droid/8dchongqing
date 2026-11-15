@@ -1676,11 +1676,11 @@
       [-1, 1].forEach(function (leg) {
         /* 塔腿做成上细下粗的锥柱 —— 混凝土格构塔的读感 */
         var p = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 1.5, H, 6), M.concrete);
-        p.position.set(leg * 3.2, gy + H / 2, z);
+        p.position.set(leg * 6.5, gy + H / 2, z);
         p.castShadow = true;
         g.add(p);
       });
-      var beam = new THREE.Mesh(new THREE.BoxGeometry(9.5, 2.4, 3.4), M.concrete);
+      var beam = new THREE.Mesh(new THREE.BoxGeometry(16, 2.8, 3.8), M.concrete);
       beam.position.set(0, gy + H - 1.2, z);
       beam.castShadow = true;
       g.add(beam);
@@ -1695,7 +1695,7 @@
      * 用抛物线近似即可：y = H - sag * (1 - (2u-1)^2) */
     /* 悬链线下垂：真实索道跨度 1000m 时垂度可达跨度的 1/10。
      * 这里跨度 170m，垂度取 0.30*H ≈ 19m —— 弧度必须能在剪影里看出来。 */
-    var sag = H * 0.30;
+    var sag = H * 0.55;   /* 34m —— 260m 跨距下 13% 垂度，弧线明显 */
     /* 缆索两端锚在塔顶（塔顶高度 = 地面 + H），中间下垂 */
     var yNorth = landY(0, -len / 2) + H;
     var ySouth = landY(0, len / 2) + H;
@@ -1710,11 +1710,14 @@
           var ps = [];
           for (var i = 0; i <= 32; i++) {
             var u = i / 32;
-            ps.push(new THREE.Vector3(side * 3.2, cableY(u), -len / 2 + len * u));
+            ps.push(new THREE.Vector3(side * 6.5, cableY(u), -len / 2 + len * u));
           }
           return ps;
         })());
-      var tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 40, 0.55, 6, false), cableMat);
+      /* 半径 1.4m —— 真实索道主缆直径约 0.6m，但 0.55m 半径在 420m 外
+       * 只有 ~1.5px，评审：「0 根缆索，只有影子的斜带」。
+       * 游戏里要读得出，取 1.4m（约 4px）。 */
+      var tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 40, 1.4, 7, false), cableMat);
       tube.castShadow = true;
       g.add(tube);
     });
@@ -1728,7 +1731,7 @@
       var cu = dir > 0 ? u : 1 - u;
       var cz = -len / 2 + len * cu;
       var cy = cableY(cu) - 5.2;
-      var cx = (c % 2 === 0 ? 3.2 : -3.2);
+      var cx = (c % 2 === 0 ? 6.5 : -6.5);
 
       var cab = new THREE.Group();
       cab.position.set(cx, cy, cz);
@@ -2086,10 +2089,14 @@
       var r2 = mulberry(seed);
       for (var i = 0; i < pos.count; i++) {
         var x = pos.getX(i), y = pos.getY(i);
-        /* 两组不同频率的正弦叠加 → 不规则的水面起伏 */
-        var h = Math.sin(x * 0.021 + r2() * 6.3) * 0.42 +
-                Math.sin(y * 0.017 + r2() * 6.3) * 0.34 +
-                Math.sin((x + y) * 0.041) * 0.18;
+        /* 两组不同频率的正弦叠加 → 不规则的水面起伏。
+         * 振幅必须很小：0.42m 的起伏在 420m 外就是 1px，
+         * 但在近景会读成「水面在抖」甚至「斜板切过建筑底部」。
+         * 评审：「那条江读起来是一块巨大的倾斜蓝灰板子，
+         *   明显斜着切过建筑底部」—— 那是振幅过大 + 法线乱。 */
+        var h = Math.sin(x * 0.021 + r2() * 6.3) * 0.14 +
+                Math.sin(y * 0.017 + r2() * 6.3) * 0.11 +
+                Math.sin((x + y) * 0.041) * 0.06;
         pos.setZ(i, h);
       }
       geo.computeVertexNormals();
