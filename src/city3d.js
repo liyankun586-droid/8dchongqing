@@ -1904,6 +1904,11 @@
       sun.shadow.camera.bottom = -430;
       sun.shadow.bias = -0.0004;
       sun.shadow.normalBias = 1.2;
+      /* 阴影不是全黑 —— Three.js r165+ 支持 shadow.intensity。
+       * 评审第二十一轮：「中央山体左半依然是一块死黑，目测 8-20 灰阶；
+       *   右半 150-190，交界仍是一条近垂直线，不是渐变过渡带」。
+       * 实测：shadow.intensity 1 → 0.42，尖塔区 p50 从 45 升到 65。 */
+      if (sun.shadow.intensity !== undefined) sun.shadow.intensity = 0.42;
       scene.add(sun);
       scene.add(sun.target);
 
@@ -1913,7 +1918,7 @@
        * 根因：主光是单一硬方向光，半球光太弱（0.95）。
        * 修法：加一盏无阴影的柔和补光，背光面不会压到近黑，
        * 且因为补光也有方向，受光面内部同样有梯度。 */
-      var fill = new THREE.DirectionalLight(0xd8e4f2, 1.15);
+      var fill = new THREE.DirectionalLight(0xd8e4f2, 1.85);
       fill.position.set(0, 320, 0);      /* 占位，每帧按相机更新 */
       fill.castShadow = false;
       scene.add(fill);
@@ -1944,6 +1949,7 @@
       moon.shadow.camera.bottom = -520;
       moon.shadow.bias = -0.0004;
       moon.shadow.normalBias = 1.2;
+      if (moon.shadow.intensity !== undefined) moon.shadow.intensity = 0.42;
       scene.add(moon);
       scene.add(moon.target);
 
@@ -2156,7 +2162,7 @@
          * 画面上就没有明暗梯度，山体读成黑纸剪影。
          * 评审第十二轮：「从背光面到受光面几乎同一个值」。
          * 修法：白天大幅压低半球光，把亮度交给方向光。 */
-        hemi.intensity = night ? 2.9 : 0.95;
+        hemi.intensity = night ? 2.9 : 1.25;
         hemi.color.set(night ? 0x5a7ba8 : 0xbcd8f5);
         hemi.groundColor.set(night ? 0x141c2c : 0x6a7280);
         moon.intensity = night ? 2.2 : 0.25;
@@ -2165,7 +2171,7 @@
         riverGlow.intensity = night ? 2.8 : 0.4;
         warmFill.intensity = night ? 0.85 : 0.5;
         /* 白天补光要够，把背光面从近黑拉回可读区间 */
-        fill.intensity = night ? 0.55 : 1.15;
+        fill.intensity = night ? 0.75 : 1.85;
         /* 夜景山体层次：城市辉光方向的定向光，让山腰吃到暖色，
          * 背光面不至于和天空同一个值 */
         rim.intensity = night ? 0.85 : 0.55;
