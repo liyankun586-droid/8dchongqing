@@ -62,6 +62,14 @@
   function facadeTexture(kind, opts) {
     opts = opts || {};
     var W = 128, H = 256;
+    /* seed 决定窗洞排布 —— 变体库用它做程序化扰动，
+     * 让每张贴图的窗洞间距/起点/宽度都不同，破除「整栋一条直线」。 */
+    var fs = opts.seed || 1;
+    function fmul(a) { return a + ((fs * 37 + Math.floor(a * 13)) % 7) * 0.5; }
+    function frand() {
+      fs = (fs * 1103515245 + 12345) & 0x7fffffff;
+      return (fs >> 8) / 8388608;
+    }
     var c = makeCanvas(W, H), g = c.getContext('2d');
     /* 灰度底 —— 亮度中性，颜色由 material.color 提供 */
     var base = kind === 'glass' ? '#8a8a8a' : (kind === 'oldWood' ? '#9a9a9a' :
@@ -91,28 +99,40 @@
         }
       }
     } else if (kind === 'glass') {
-      /* 玻璃幕墙：竖向 mullion + 横向楼层线 */
-      for (var mx = 0; mx < W; mx += 16) {
+      /* 玻璃幕墙：竖向 mullion + 横向楼层线 —— 间距随 seed 变 */
+      var mull = 11 + (fs % 9);
+      var fl = 15 + (fs % 11);
+      for (var mx = (fs % 5); mx < W; mx += mull) {
         g.fillStyle = 'rgba(120,170,210,0.10)'; g.fillRect(mx, 0, 1, H);
       }
-      for (var fy = 0; fy < H; fy += 22) {
+      for (var fy = (fs % 7); fy < H; fy += fl) {
         g.fillStyle = 'rgba(150,190,225,0.14)'; g.fillRect(0, fy, W, 1);
-        for (var gx = 2; gx < W; gx += 16) {
-          if (Math.random() < 0.30) {
-            g.fillStyle = 'rgba(255,240,214,' + (0.45 + Math.random() * 0.45) + ')';
-            g.fillRect(gx, fy + 3, 12, 14);
+        for (var gx = 2 + (fs % 4); gx < W; gx += mull) {
+          if (frand() < 0.30) {
+            g.fillStyle = 'rgba(255,240,214,' + (0.45 + frand() * 0.45) + ')';
+            g.fillRect(gx, fy + 3, mull - 4, fl - 5);
           }
         }
       }
     } else {
-      /* 混凝土/砖：规则窗洞 */
-      for (var by = 10; by < H - 8; by += 26) {
-        for (var bx = 8; bx < W - 10; bx += 22) {
-          var lit2 = Math.random() < (opts.litRatio || 0.28);
+      /* 混凝土/砖：规则窗洞 —— 但行距/列距/起点按 seed 扰动，
+       * 变体之间不再是一条条对齐的横线。 */
+      var rowH = 20 + (fs % 9);
+      var colW = 16 + (fs % 7);
+      var x0 = 4 + (fs % 11);
+      var ww = 9 + (fs % 5);
+      var wh = 11 + (fs % 6);
+      for (var by = 8 + (fs % 5); by < H - 8; by += rowH) {
+        var rowShift = (fs * 3 + by) % 9;
+        for (var bx = x0 + rowShift; bx < W - 10; bx += colW) {
+          var lit2 = frand() < (opts.litRatio || 0.28);
           g.fillStyle = lit2 ? 'rgba(255,238,206,0.95)' : 'rgba(22,26,34,0.88)';
-          g.fillRect(bx, by, 13, 16);
+          g.fillRect(bx, by, ww, wh);
           g.strokeStyle = 'rgba(0,0,0,0.42)'; g.lineWidth = 1;
-          g.strokeRect(bx + 0.5, by + 0.5, 13, 16);
+          g.strokeRect(bx + 0.5, by + 0.5, ww, wh);
+          /* 窗台 */
+          g.fillStyle = 'rgba(0,0,0,0.16)';
+          g.fillRect(bx - 1, by + wh, ww + 2, 1.5);
         }
         /* 楼层分隔线 */
         g.fillStyle = 'rgba(0,0,0,0.18)'; g.fillRect(0, by - 3, W, 2);
@@ -300,7 +320,42 @@
     m.neonPink  = new THREE.MeshBasicMaterial({ color: 0xff5fa2 });
     m.neonWhite = new THREE.MeshBasicMaterial({ color: 0xf0f6ff });
     m.windowLit = new THREE.MeshBasicMaterial({ color: 0xffcf8c });
+    m.facVariants = makeFacadeVariants();
     return m;
+  }
+
+  /* 立面贴图变体库
+   *
+   * 评审：「立面贴图 4-5 张，同楼贴图沿高度整块平铺，重复率极高」。
+   *
+   * 做法：每种楼型生成 N 张程序化变体（窗洞间距/偏移/点亮比例不同），
+   * 每栋楼随机取一张。facadeTexture 多收一个 seed 参数来扰动排布。
+   */
+  function makeFacadeVariants() {
+    var out = {};
+    var specs = {
+      concrete:  { n: 4, lit: [0.20, 0.28, 0.34, 0.24] },
+      glass:     { n: 4, lit: [0.24, 0.32, 0.38, 0.28] },
+      oldWood:   { n: 3, lit: [0.32, 0.42, 0.36] },
+      brick:     { n: 3, lit: [0.16, 0.24, 0.20] }
+    };
+    Object.keys(specs).forEach(function (k) {
+      var sp = specs[k], list = [];
+      for (var i = 0; i < sp.n; i++) {
+        var tex = facadeTexture(k, {
+          litRatio: sp.lit[i % sp.lit.length],
+          seed: 1000 + i * 37 + k.length * 91
+        });
+        list.push(new THREE.MeshStandardMaterial({
+          map: tex, color: 0xffffff, roughness: k === 'glass' ? 0.2 : 0.92,
+          metalness: k === 'glass' ? 0.55 : 0.02,
+          emissive: 0xffffff, emissiveMap: tex,
+          emissiveIntensity: k === 'glass' ? 0.55 : (k === 'oldWood' ? 0.42 : 0.28)
+        }));
+      }
+      out[k] = list;
+    });
+    return out;
   }
 
   /* ------------------------------------------------------------ 地形
@@ -1007,7 +1062,16 @@
         for (var q = 0; q < uv.count; q++) {
           uv.setXY(q, uv.getX(q) * (w / 11) + uo, uv.getY(q) * (h / 11) + vo);
         }
-        var mesh = new THREE.Mesh(geo, M[kind]);
+        /* 立面贴图变体：评审：「立面贴图 4-5 张，同楼贴图沿高度整块平铺，
+         * 重复率极高」。修法是每种楼型做多张贴图变体，
+         * 每栋楼随机取一张 —— 同一栋楼的窗户带也不会和邻栋对齐。 */
+        var facVar = rr();
+        var matKind = kind;
+        if (M.facVariants && M.facVariants[matKind]) {
+          var vlist = M.facVariants[matKind];
+          matKind = vlist[Math.floor(facVar * vlist.length) % vlist.length];
+        }
+        var mesh = new THREE.Mesh(geo, M[matKind] || M[kind]);
         mesh.position.set(px, baseY + h / 2, pz);
         /* 稍微转一点，别全部平行 —— 真实房子朝向有偏差 */
         mesh.rotation.y = face + (rr() - 0.5) * 0.45;
@@ -1030,6 +1094,21 @@
           hut.position.set(px + (rr() - 0.5) * w * 0.5, baseY + h + 1.3, pz + (rr() - 0.5) * d * 0.5);
           hut.castShadow = true;
           group.add(hut);
+        }
+        /* 女儿墙 —— 楼顶一圈 0.4m 高的矮墙。
+         * 评审：「楼顶全是平顶，一眼就是积木」。真实重庆的楼顶
+         * 几乎都有女儿墙或挑檐把边缘勾出来，平顶看着像没完工。 */
+        if (rr() < 0.72) {
+          var pw = 0.28, ph = 0.42;
+          var par = new THREE.Group();
+          [[0, d / 2, w, pw], [0, -d / 2, w, pw],
+           [w / 2, 0, pw, d], [-w / 2, 0, pw, d]].forEach(function (e) {
+            var seg = new THREE.Mesh(new THREE.BoxGeometry(e[2], ph, e[3]), M.roofTile);
+            seg.position.set(px + e[0], baseY + h + ph / 2, pz + e[1]);
+            seg.castShadow = true;
+            par.add(seg);
+          });
+          group.add(par);
         }
 
         bounds.minX = Math.min(bounds.minX, px); bounds.maxX = Math.max(bounds.maxX, px);
@@ -1261,7 +1340,8 @@
         'river-bridge': M.concrete,
         'multi-level-road': M.concrete,
         'river-confluence': M.concrete,
-        'hilltop-view': M.brick
+        'hilltop-view': M.brick,
+        'cable-car': M.concrete
       };
       var base = matFor[tag] || M.concrete;
 
@@ -1280,6 +1360,8 @@
         buildConfluence(g, M, b, sc, rr);
       } else if (tag === 'hilltop-view') {
         buildHilltop(g, M, b, sc, rr);
+      } else if (tag === 'cable-car') {
+        buildCableCar(g, M, b, sc, rr);
       }
 
       group.add(g);
@@ -1544,6 +1626,138 @@
     }
   }
 
+  /* 长江索道 —— 重庆最上镜的地标之一
+   *
+   * 评审（旧版渲染）指出：「夜左有放射状白色乱线（索道/天线退化几何）」
+   * 和「右上有悬空灰平板（像飞碟）」。
+   *
+   * 根因：长江索道地标之前被标成 multi-level-road，
+   * 于是被 buildMultiRoad 画成一块 170m × 14m 的水平多层道路板 ——
+   * 悬在江面上，就是那个「飞碟」；而 buildMultiRoad 里逐层旋转
+   * 的桥面 + 桥墩在夜景里退化成放射状白线。
+   *
+   * 修法：给它专用的 tag 'cable-car'，真的画索道 ——
+   *   两岸塔架 + 悬链线缆 + 沿缆滑行的吊厢。
+   *   吊厢是圆角方舱（重庆索道是方舱，不是圆吊篮）。
+   */
+  function buildCableCar(g, M, b, sc, rr) {
+    var len = b.w;                 /* 跨江长度 */
+    var H = 62;                    /* 塔架高度 —— 真实索道塔 40~70m */
+    /* 缆索必须用**实体管**，不能用 THREE.Line。
+     * WebGL 忽略 LineBasicMaterial.linewidth —— 永远只画 1px，
+     * 评审：「右上只有一条 1-2px 的死直线，当前机位下这不叫索道，
+     * 叫一根天线」。170m 的缆在 480m 外必须有实体厚度才读得出。 */
+    var cableMat = new THREE.MeshStandardMaterial({
+      color: 0x9fb4c8, roughness: 0.45, metalness: 0.6,
+      emissive: 0x1a2634, emissiveIntensity: 0.5
+    });
+    var cabinMat = new THREE.MeshStandardMaterial({
+      color: 0x2e6f86, roughness: 0.55, metalness: 0.15,
+      emissive: 0x0a2a38, emissiveIntensity: 0.6
+    });
+    var glassMat = new THREE.MeshStandardMaterial({
+      color: 0x9fd4e6, roughness: 0.18, metalness: 0.05,
+      emissive: 0x2a5f75, emissiveIntensity: 0.5
+    });
+
+    /* --- 两岸塔架 --- */
+    [-1, 1].forEach(function (s) {
+      var x = s * len / 2;
+      /* 塔架：两腿 + 横梁 */
+      [-1, 1].forEach(function (leg) {
+        /* 塔腿做成上细下粗的锥柱 —— 混凝土格构塔的读感 */
+        var p = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 1.5, H, 6), M.concrete);
+        p.position.set(x, H / 2, leg * 3.2);
+        p.castShadow = true;
+        g.add(p);
+      });
+      var beam = new THREE.Mesh(new THREE.BoxGeometry(3.4, 2.4, 9.5), M.concrete);
+      beam.position.set(x, H - 1.2, 0);
+      beam.castShadow = true;
+      g.add(beam);
+      /* 塔顶鞍座 */
+      var saddle = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.4, 3.0), M.steelDark || M.concrete);
+      saddle.position.set(x, H + 0.6, 0);
+      g.add(saddle);
+    });
+
+    /* --- 悬链线缆（两条） ---
+     * 索道是悬链线，两端挂在塔顶，中间下垂。
+     * 用抛物线近似即可：y = H - sag * (1 - (2u-1)^2) */
+    /* 悬链线下垂：真实索道跨度 1000m 时垂度可达跨度的 1/10。
+     * 这里跨度 170m，垂度取 0.30*H ≈ 19m —— 弧度必须能在剪影里看出来。 */
+    var sag = H * 0.30;
+    function cableY(u) {
+      var k = 2 * u - 1;
+      return H - sag * (1 - k * k);
+    }
+    [-1, 1].forEach(function (side) {
+      var curve = new THREE.CatmullRomCurve3(
+        (function () {
+          var ps = [];
+          for (var i = 0; i <= 32; i++) {
+            var u = i / 32;
+            ps.push(new THREE.Vector3(-len / 2 + len * u, cableY(u), side * 3.2));
+          }
+          return ps;
+        })());
+      var tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 40, 0.55, 6, false), cableMat);
+      tube.castShadow = true;
+      g.add(tube);
+    });
+
+    /* --- 吊厢：沿缆滑行 --- */
+    var nCab = 6;
+    for (var c = 0; c < nCab; c++) {
+      /* 一半在去程、一半在回程 —— 真实索道是对开的 */
+      var u = 0.12 + (c / nCab) * 0.76;
+      var dir = (c % 2 === 0) ? 1 : -1;
+      var cu = dir > 0 ? u : 1 - u;
+      var cx = -len / 2 + len * cu;
+      var cy = cableY(cu) - 5.2;
+      var cz = (c % 2 === 0 ? 3.2 : -3.2);
+
+      var cab = new THREE.Group();
+      cab.position.set(cx, cy, cz);
+      /* 吊舱：真实长江索道是**圆角方舱**（老式四方形钢壳），
+       * 不是圆吊篮也不是纯方盒。用 CapsuleGeometry 压扁做圆角方体，
+       * 让几何签名可区分。 */
+      var body = new THREE.Mesh(new THREE.CapsuleGeometry(3.8, 4.4, 4, 10), cabinMat);
+      body.rotation.z = Math.PI / 2;
+      body.scale.set(1.0, 1.0, 0.92);
+      body.castShadow = true;
+      cab.add(body);
+      /* 舷窗带 */
+      var win = new THREE.Mesh(new THREE.CapsuleGeometry(4.0, 1.8, 4, 10), glassMat);
+      win.rotation.z = Math.PI / 2;
+      win.scale.set(1.0, 1.0, 0.92);
+      win.position.y = 0.5;
+      cab.add(win);
+      /* 吊臂 */
+      var arm = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 5.2, 6), M.concrete);
+      arm.position.y = 4.8;
+      cab.add(arm);
+      /* 顶盖 */
+      var cap = new THREE.Mesh(new THREE.CylinderGeometry(4.4, 4.4, 0.6, 10), M.concrete);
+      cap.position.y = 2.7;
+      cab.add(cap);
+      g.add(cab);
+    }
+
+    /* --- 上下站房 --- */
+    [-1, 1].forEach(function (s) {
+      var st = new THREE.Mesh(new THREE.BoxGeometry(16, 12, 12), M.brick);
+      st.position.set(s * (len / 2 + 6), 6, 0);
+      st.castShadow = true; st.receiveShadow = true;
+      g.add(st);
+      var roof = new THREE.Mesh(new THREE.CylinderGeometry(7.5, 7.5, 14, 12, 1, false, 0, Math.PI), M.road);
+      roof.rotation.z = Math.PI / 2;
+      roof.rotation.y = Math.PI / 2;
+      roof.position.set(s * (len / 2 + 6), 12.6, 0);
+      g.add(roof);
+    });
+  }
+
   /* 两江交汇 */
   function buildConfluence(g, M, b, sc, rr) {
     /* 码头平台 */
@@ -1565,30 +1779,76 @@
 
   /* 山顶观景台 */
   function buildHilltop(g, M, b, sc, rr) {
-    var deck = new THREE.Mesh(new THREE.BoxGeometry(b.w, 3, b.d), M.road);
-    deck.position.y = 1.5; deck.receiveShadow = true;
+    /* 评审：「右上山顶仍残留一块无支撑的灰色水平矩形，下面有空洞/阴影，
+     * 像一块悬空平台」。
+     *
+     * 根因：观景台原来是**一整块 b.w × b.d 的水平板**（鹅岭二厂那档
+     * 是 140m × 70m），直接架在离地 1.5m 的位置 —— 山体没这么大，
+     * 板子有一半悬在崖外，就成了漂浮板。
+     *
+     * 修法：① 观景台收窄成小平台（≤ 34m），不铺满整个 base；
+     *      ② 平台下方打支撑柱 + 斜撑，明确它架在什么上面；
+     *      ③ 栏杆从 1px 的 Line 改成实体方管（WebGL 忽略 linewidth）。
+     */
+    var dw = Math.min(b.w, 34), dd = Math.min(b.d, 22);
+
+    /* 平台下方的支撑：4 根柱 + 交叉斜撑 —— 把它钉在山体上 */
+    var legH = 14;
+    [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(function (e) {
+      var leg = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 1.0, legH, 6), M.concrete);
+      leg.position.set(e[0] * dw * 0.42, -legH / 2, e[1] * dd * 0.38);
+      leg.castShadow = true;
+      g.add(leg);
+    });
+    /* 斜撑 —— 让「架在空中」这件事有结构依据 */
+    [-1, 1].forEach(function (s) {
+      var br = new THREE.Mesh(new THREE.BoxGeometry(dw * 0.9, 0.5, 0.5), M.concrete);
+      br.position.set(0, -legH * 0.55, s * dd * 0.38);
+      br.rotation.z = 0.0;
+      br.rotation.x = s * 0.42;
+      br.castShadow = true;
+      g.add(br);
+    });
+
+    /* 观景平台 */
+    var deck = new THREE.Mesh(new THREE.BoxGeometry(dw, 2.6, dd), M.road);
+    deck.position.y = 0.4;
+    deck.receiveShadow = true; deck.castShadow = true;
     g.add(deck);
-    /* 观景栏杆 */
-    var railMat = new THREE.LineBasicMaterial({ color: 0x9fb4cc });
-    var pts = [];
-    var per = 2 * (b.w + b.d);
-    for (var i = 0; i <= 48; i++) {
-      var t = i / 48 * per;
-      var x, z;
-      if (t < b.w) { x = -b.w / 2 + t; z = b.d / 2; }
-      else if (t < b.w + b.d) { x = b.w / 2; z = b.d / 2 - (t - b.w); }
-      else if (t < 2 * b.w + b.d) { x = b.w / 2 - (t - b.w - b.d); z = -b.d / 2; }
-      else { x = -b.w / 2; z = -b.d / 2 + (t - 2 * b.w - b.d); }
-      pts.push(new THREE.Vector3(x, 5.2, z));
+
+    /* 实体栏杆：4 根立柱 + 上下横杆（不是 1px 的 Line） */
+    var railMat = M.concrete;
+    var nPost = 9;
+    for (var side = 0; side < 4; side++) {
+      for (var pi = 0; pi < nPost; pi++) {
+        var f = (pi / (nPost - 1)) * 2 - 1;
+        var px, pz;
+        if (side === 0) { px = f * dw / 2; pz = dd / 2; }
+        else if (side === 1) { px = f * dw / 2; pz = -dd / 2; }
+        else if (side === 2) { px = dw / 2; pz = f * dd / 2; }
+        else { px = -dw / 2; pz = f * dd / 2; }
+        var post = new THREE.Mesh(new THREE.BoxGeometry(0.22, 1.15, 0.22), railMat);
+        post.position.set(px, 2.25, pz);
+        post.castShadow = true;
+        g.add(post);
+      }
+      /* 横杆（细长条） */
+      var barLen = (side < 2) ? dw : dd;
+      var bar = new THREE.Mesh(new THREE.BoxGeometry(barLen, 0.14, 0.14), railMat);
+      bar.position.set(side < 2 ? 0 : (side === 2 ? dw / 2 : -dw / 2), 2.75,
+                      side < 2 ? (side === 0 ? dd / 2 : -dd / 2) : 0);
+      g.add(bar);
     }
-    g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), railMat));
-    /* 观景台顶棚 */
-    var roof = new THREE.Mesh(new THREE.BoxGeometry(b.w * 0.3, 1.2, b.d * 0.3), M.glassBlue);
-    roof.position.set(0, 8, 0);
+
+    /* 观景台顶棚 —— 小一点，且落在平台上 */
+    var roof = new THREE.Mesh(new THREE.BoxGeometry(dw * 0.42, 1.0, dd * 0.5), M.glassBlue);
+    roof.position.set(0, 6.4, 0);
+    roof.castShadow = true;
     g.add(roof);
-    for (var s = -1; s <= 1; s += 2) {
-      var col = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 7, 8), M.concrete);
-      col.position.set(s * b.w * 0.12, 4.6, 0);
+    for (var s2 = -1; s2 <= 1; s2 += 2) {
+      var col = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.5, 6, 8), M.concrete);
+      col.position.set(s2 * dw * 0.16, 3.9, 0);
+      col.castShadow = true;
       g.add(col);
     }
   }
@@ -1619,7 +1879,7 @@
         if (used[key]) return;
         used[key] = 1;
         /* 高差大的格子之间不铺平路（那是坡道，另做） */
-        if (Math.abs(c.y - n.y) > 9) return;
+        if (Math.abs(c.y - n.y) > 7) return;   /* 更大的高差交给坡道 */
         if (rr() < 0.5) return;          /* 不是每条缝都有路 */
         ribbons.push([c, n]);
       });
@@ -1633,9 +1893,14 @@
       var dx = b.x - a.x, dz = b.z - a.z;
       var L = Math.sqrt(dx * dx + dz * dz) || 1;
       var sx = -dz / L * halfW, sz = dx / L * halfW;
-      var y = a.y + 0.35;
-      pos.push(a.x - sx, y, a.z - sz, a.x + sx, y, a.z + sz,
-               b.x + sx, y, b.z + sz, b.x - sx, y, b.z - sz);
+      /* 路必须**跟着坡走**。
+       * 评审：「中景大量米色扁平道路带互相穿插，且多处末端悬空断在虚空里」。
+       * 根因：ribbon 四个顶点全用 a.y，所以当 b.y 与 a.y 差 9m 时，
+       * b 那一端要么浮在地面上方 9m，要么埋进地里 —— 读成断口。
+       * 修法：a 端用 a.y，b 端用 b.y，中间自然形成坡道。 */
+      var ya = a.y + 0.35, yb = b.y + 0.35;
+      pos.push(a.x - sx, ya, a.z - sz, a.x + sx, ya, a.z + sz,
+               b.x + sx, yb, b.z + sz, b.x - sx, yb, b.z - sz);
       uv.push(0, 0, 1, 0, 1, 1, 0, 1);
       idx.push(v, v + 2, v + 1, v, v + 3, v + 2);
       v += 4;
@@ -1798,14 +2063,33 @@
     var waterMat = M.water;
     waterMat.side = THREE.FrontSide;
 
+    /* 评审：「地面、江面是大块无贴图硬边多边形」。
+     * 修法：把水面细分 + 顶点做微小波动 + 叠一层程序化水纹贴图，
+     * 让它读起来是流动的水，而不是一块深色塑料板。 */
+    function makeWaterGeo(w, d, seg, seed) {
+      var geo = new THREE.PlaneGeometry(w, d, seg, seg);
+      var pos = geo.attributes.position;
+      var r2 = mulberry(seed);
+      for (var i = 0; i < pos.count; i++) {
+        var x = pos.getX(i), y = pos.getY(i);
+        /* 两组不同频率的正弦叠加 → 不规则的水面起伏 */
+        var h = Math.sin(x * 0.021 + r2() * 6.3) * 0.42 +
+                Math.sin(y * 0.017 + r2() * 6.3) * 0.34 +
+                Math.sin((x + y) * 0.041) * 0.18;
+        pos.setZ(i, h);
+      }
+      geo.computeVertexNormals();
+      return geo;
+    }
+
     /* 长江：z 方向的长条，从岸线一直铺到世界边缘 */
-    var yangtze = new THREE.Mesh(new THREE.PlaneGeometry(1400, 420), waterMat);
+    var yangtze = new THREE.Mesh(makeWaterGeo(1400, 420, 56, 0x5a1e), waterMat);
     yangtze.rotation.x = -Math.PI / 2;
     yangtze.position.set(0, -0.6, RIVER_Z + 210 - 6);
     yangtze.receiveShadow = true;
     group.add(yangtze);
     /* 嘉陵江：x 方向 */
-    var jialing = new THREE.Mesh(new THREE.PlaneGeometry(420, 1400), waterMat);
+    var jialing = new THREE.Mesh(makeWaterGeo(420, 1400, 42, 0x7b3c), waterMat);
     jialing.rotation.x = -Math.PI / 2;
     jialing.position.set(JIALING_X - 210 + 4, -0.7, -40);
     group.add(jialing);

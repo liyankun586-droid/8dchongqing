@@ -102,7 +102,7 @@
       en: 'Yangtze River Cableway',
       zh: '长江索道',
       lat: 29.5575, lng: 106.5857,
-      tag: 'multi-level-road',
+      tag: 'cable-car',
       blurbEn: 'Opened in 1987, it crosses two kilometres of river from Xinhua Road to Shangxin Street. One car, one crossing, one view.',
       blurbZh: '一九八七年通车的过江索道，从新华路跨到上新街，单程一趟要过江两公里。',
       blurbEs: 'Abierto en 1987, cruza dos kilómetros de río desde Xinhua Road hasta Shangxin Street. Una cabina, un cruce, una vista.',
