@@ -31,6 +31,104 @@
   /* ================================================================
    * 3D 山城视图
    * ================================================================ */
+  /* ================================================================
+   * 3D 山城视图（Three.js 真 3D）
+   *
+   * 老版是 Canvas 2D 等距示意图 —— 那是「示意图」，不是 3D。
+   * 这一版接 city3d.js：第一人称能在楼群里走、能飞到江对岸、
+   * 能点开洪崖洞/解放碑/长江索道这些地标。
+   * 如果 WebGL 不可用，自动退回老的 2D 版本。
+   * ================================================================ */
+  function CityView3D(host, opts) {
+    opts = opts || {};
+    this.host = host;
+    this.seed = opts.seed || 20261114;
+    this.night = opts.night !== false;
+    this.landmarks = opts.landmarks || [];
+    this.onLandmark = opts.onLandmark || function () {};
+    this.engine = null;
+    this.mode = 'orbit';
+
+    var wrap = el('div', 'citywrap city3d');
+    var stage = el('div', 'city3dstage');
+    var hint = el('div', 'cityhint');
+    var toolbar = el('div', 'citytools');
+
+    /* 模式按钮：环视 / 步行 / 飞行 */
+    var mOrbit = el('button', 'citybtn wide', '环视');
+    var mWalk  = el('button', 'citybtn wide', '步行');
+    var mFly   = el('button', 'citybtn wide', '飞行');
+    var toggle = el('button', 'citybtn', this.night ? '☾' : '☀');
+    var focus  = el('button', 'citybtn wide', '全城');
+
+    toolbar.appendChild(mOrbit);
+    toolbar.appendChild(mWalk);
+    toolbar.appendChild(mFly);
+    toolbar.appendChild(focus);
+    toolbar.appendChild(toggle);
+
+    wrap.appendChild(stage);
+    stage.appendChild(hint);
+    stage.appendChild(toolbar);
+    host.appendChild(wrap);
+
+    var self = this;
+
+    /* --- 起 Three.js --- */
+    if (!root.THREE || !root.CQCITY3D) {
+      hint.textContent = '3D engine unavailable';
+      return;
+    }
+    var engine = root.CQCITY3D.create(stage, {
+      seed: this.seed,
+      night: this.night,
+      landmarks: this.landmarks,
+      onLandmark: function (lm) { self.onLandmark(lm); }
+    });
+    if (!engine) {
+      hint.textContent = '3D engine failed to start';
+      return;
+    }
+    this.engine = engine;
+
+    /* --- 交互 --- */
+    function setMode(m) {
+      self.mode = m;
+      engine.setMode(m);
+      mOrbit.className = 'citybtn wide' + (m === 'orbit' ? ' on' : '');
+      mWalk.className  = 'citybtn wide' + (m === 'walk'  ? ' on' : '');
+      mFly.className   = 'citybtn wide' + (m === 'fly'   ? ' on' : '');
+      hint.textContent = m === 'walk'
+        ? 'WASD 走动 · 鼠标拖动转头 · 点击地标'
+        : (m === 'fly' ? 'WASD 飞行 · Shift 加速 · 点击地标'
+                       : '拖动旋转 · 滚轮缩放 · 点击地标');
+    }
+    mOrbit.onclick = function () { setMode('orbit'); };
+    mWalk.onclick  = function () { setMode('walk'); };
+    mFly.onclick   = function () { setMode('fly'); };
+    setMode('orbit');
+
+    toggle.onclick = function () {
+      self.night = !self.night;
+      engine.setDayNight(self.night);
+      toggle.textContent = self.night ? '☾' : '☀';
+    };
+
+    focus.onclick = function () {
+      engine.setOrbit(0.6, 0.62, 720);
+      setMode('orbit');
+    };
+
+    /* 点地标 → 飞到那儿去 */
+    this.focusLandmark = function (lm) {
+      var b = lm && lm.base;
+      if (!b) return;
+      engine.setMode('fly');
+      setMode('fly');
+      engine.focusOn(b.x, b.y, b.z);
+    };
+  }
+
   function CityView(host, opts) {
     opts = opts || {};
     this.host = host;
@@ -404,6 +502,7 @@
   }
 
   root.CQCITYVIEW = {
+    CityView3D: CityView3D,
     CityView: CityView,
     LandmarkPanel: LandmarkPanel,
     ClockBar: ClockBar,

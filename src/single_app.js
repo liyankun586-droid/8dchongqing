@@ -786,6 +786,53 @@
     head.appendChild(el('div', 'citysub', U('纯代码生成：没有一张贴图，每一栋楼、每一扇窗都是函数算出来的。点地标进去看看。')));
     host.appendChild(head);
 
+    /* --- 真 3D 优先（Three.js）--- */
+    if (root.THREE && root.CQCITY3D) {
+      var stage = el('div', 'city3dstage');
+      host.appendChild(stage);
+      var engine = root.CQCITY3D.create(stage, {
+        seed: 20261114,
+        night: true,
+        landmarks: lms,
+        onLandmark: function (lm) { openLandmark(lm); }
+      });
+      if (engine) {
+        /* 模式工具条 —— 必须放进 stage 里，absolute 定位才相对画布 */
+        var tb = el('div', 'citytools');
+        var bOrbit = el('button', 'citybtn wide', '环视');
+        var bWalk = el('button', 'citybtn wide', '步行');
+        var bFly = el('button', 'citybtn wide', '飞行');
+        var bNight = el('button', 'citybtn', '☾');
+        tb.appendChild(bOrbit); tb.appendChild(bWalk); tb.appendChild(bFly); tb.appendChild(bNight);
+        stage.appendChild(tb);
+        var h3 = el('div', 'cityhint', '拖动旋转 · 滚轮缩放 · 点击地标');
+        stage.appendChild(h3);
+        function setMode(m) {
+          engine.setMode(m);
+          bOrbit.className = 'citybtn wide' + (m === 'orbit' ? ' on' : '');
+          bWalk.className = 'citybtn wide' + (m === 'walk' ? ' on' : '');
+          bFly.className = 'citybtn wide' + (m === 'fly' ? ' on' : '');
+          h3.textContent = m === 'walk'
+            ? 'WASD 走动 · 鼠标拖动转头 · 点击地标'
+            : (m === 'fly' ? 'WASD 飞行 · Shift 加速 · 点击地标'
+                           : '拖动旋转 · 滚轮缩放 · 点击地标');
+        }
+        bOrbit.onclick = function () { setMode('orbit'); };
+        bWalk.onclick = function () { setMode('walk'); };
+        bFly.onclick = function () { setMode('fly'); };
+        setMode('orbit');
+        bNight.onclick = function () {
+          var n = !engine.isNight;
+          engine.setDayNight(n);
+          bNight.textContent = n ? '☾' : '☀';
+        };
+        state.cityEngine = engine;
+        return;
+      }
+      /* Three.js 起不来 → 移除 stage，继续走 2D 兜底 */
+      host.removeChild(stage);
+    }
+
     var probe = document.createElement('canvas');
     var has2d = false;
     try { has2d = !!(probe.getContext && probe.getContext('2d')); } catch (e) { has2d = false; }

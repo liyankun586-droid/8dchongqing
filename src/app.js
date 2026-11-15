@@ -1123,11 +1123,29 @@
      * 这就是「3D 山城不显示」的真正原因。 */
     var cityInner = el('div', 'cityhostinner', '');
     state.cityHost.appendChild(cityInner);
-    var view = new window.CQCITYVIEW.CityView(cityInner, {
-      seed: state.seed || 20261114,
-      landmarks: lms,
-      onLandmark: function (lm) { openLandmark(lm); }
-    });
+    /* 优先用真 3D（Three.js）；WebGL 不可用才退回 2D 等距示意图。 */
+    var view;
+    if (window.CQCITYVIEW.CityView3D && window.THREE && window.CQCITY3D) {
+      view = new window.CQCITYVIEW.CityView3D(cityInner, {
+        seed: state.seed || 20261114,
+        landmarks: lms,
+        onLandmark: function (lm) { openLandmark(lm); }
+      });
+      if (!view.engine) {
+        cityInner.innerHTML = '';
+        view = new window.CQCITYVIEW.CityView(cityInner, {
+          seed: state.seed || 20261114,
+          landmarks: lms,
+          onLandmark: function (lm) { openLandmark(lm); }
+        });
+      }
+    } else {
+      view = new window.CQCITYVIEW.CityView(cityInner, {
+        seed: state.seed || 20261114,
+        landmarks: lms,
+        onLandmark: function (lm) { openLandmark(lm); }
+      });
+    }
     state.cityView = view;
 
     var p = new window.CQCITYVIEW.LandmarkPanel(panel);

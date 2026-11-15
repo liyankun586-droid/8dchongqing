@@ -945,3 +945,10 @@ body.zh { font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Se
 .cs-form-msg { font-size: 12px; }
 .cs-form-msg.ok { color: #6cc48a; }
 .cs-form-msg.err { color: #e08a8a; }
+
+/* ---- 真 3D 山城（Three.js）---- */
+.city3dstage { position: relative; width: 100%; height: 460px; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: #050a12; }
+.city3dstage canvas { display: block; width: 100% !important; height: 100% !important; }
+.city3d .citytools, .cityhost .citytools { position: absolute; right: 10px; top: 10px; display: flex; gap: 6px; z-index: 5; }
+.city3d .cityhint, .cityhost .cityhint { position: absolute; left: 10px; bottom: 8px; color: #7f98b5; font-size: 11.5px; z-index: 5; }
+.citybtn.on { background: rgba(120, 190, 255, .28); border-color: rgba(140, 200, 255, .6); color: #dff0ff; }
