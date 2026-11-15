@@ -610,7 +610,7 @@
      * 人工把坡切成一圈圈台地，台地之间是挡墙。
      * 这样挡墙是**连续的长条**，读出来是「一圈圈山坎」，不是「一片鳞」。
      */
-    var walls = buildRetainingWalls(cells, grid, GRID_N, cell, 9, M);
+    var walls = buildRetainingWalls(cells, grid, GRID_N, cell, 9, M, seed);
     if (walls) {
       walls.castShadow = true; walls.receiveShadow = true;
       group.add(walls);
@@ -643,8 +643,28 @@
    *   ② 高度 = 到下一圈等高线的高差（垂直方向）
    *   ③ 一整圈是一个连续带，不是碎片
    */
-  function buildRetainingWalls(cells, grid, N, cell, step, M) {
-    /* 找出所有高度level */
+  /* ------------------------------------------------ 连续台地 + 挡墙
+   * 重庆的山坎 = **水平踏面 + 垂直挡墙**的组合。
+   *
+   * 第十五轮评审（决定性诊断）：
+   *   「所有『梯田』表现为一条条无光照唇的黑楔形，**台阶没有受光的踏面**
+   *     —— 所以看不出是台阶，只看出是裂缝/爪痕」
+   *   「楼梯也不是沿等高线连续走，而是每隔一段一个离散楔形」
+   *
+   * 根因：上一版只生成了**竖直挡墙**，没有**水平踏面**。
+   * 竖直面在俯视角下是侧对相机的窄条，DoubleSide 让它露出背光内壁
+   * → 一排黑楔形。
+   *
+   * 修法（按真实台地剖面重建）：
+   *   ① 踏面：等高线上每点沿**下坡方向**外延 SHELF 米，y 恒等于该等高线高
+   *      —— 水平面，法线朝上，**一定受光**，读出来就是「台地」
+   *   ② 挡墙：在踏面的**外沿**（下坡方向末端）竖直落下，落到该处实际地形高
+   *      —— 外侧朝下坡，法线朝外，只渲染外侧（FrontSide + 正确绕序）
+   *   ③ 踏面与挡墙连成一条连续的「L 形」剖面带，沿等高线不断开
+   *
+   * 这样每一圈等高线 = 一圈可见的台阶，一眼就是重庆。
+   */
+  function buildRetainingWalls(cells, grid, N, cell, step, M, seed) {
     var maxH = 0, minH = 1e9;
     cells.forEach(function (c) {
       if (c.y > maxH) maxH = c.y;
@@ -653,50 +673,60 @@
 
     var pos = [], uv = [], idx = [];
     var vbase = 0;
+    var SHELF = 3.2;          /* 踏面外延宽度（米）*/
 
-    /* 每一圈等高线都做一圈墙 */
     for (var lv = minH + step; lv < maxH; lv += step) {
       var segs = contourSegments(grid, N, lv);
       if (!segs.length) continue;
-
-      /* 把这一圈的线段串成链 */
       var chains = linkSegments(segs, cell * 1.2);
       chains.forEach(function (chain) {
         if (chain.length < 6) return;
 
-        /* 墙顶 = 当前等高线高度。
-         *
-         * 墙底**不能**挖到下一圈等高线 —— 地形是连续曲面，
-         * 墙底插进地形内部就会 z-fighting，渲染出黑色三角破面
-         * （评审第十三轮：「纯黑倒三角，沿脊线纵向排 8–10 组，
-         *   单个边长 18–25px，一眼能数出格子」；
-         *  实测：隐藏水面暗像素 803→13，说明破面来自水面/地形的共面，
-         *  但墙底穿地同理 —— 两者都要消除）。
-         *
-         * 正确做法：墙底 = 实际地形高度，墙只「露出」地面之上的那一段。
-         * 这样墙永远不会和地形共面，也永远不会插进地形。
-         */
         var start = vbase;
+        /* 每个等高线点生成 4 个顶点：
+         *   0 = 内沿顶部（等高线本身）      1 = 外沿顶部（踏面外缘）
+         *   2 = 内沿底部                    3 = 外沿底部（落到地形）
+         * 内沿底部和内沿顶部重合，踏面就是 0-1 之间的水平面。
+         * 挡墙是 1-3 之间的竖直面。
+         */
+        var outward = [];
         for (var i = 0; i < chain.length; i++) {
           var p = chain[i];
-          var top = lv;
-          /* 墙底：取这条等高线在坡下的实际地面高度，只留 1.5m 的裙边 */
-          var gHere = groundAt(p.x, p.z);
-          var bot = Math.max(gHere - 1.2, lv - step * 0.55);
-          if (bot >= top - 0.6) { bot = top - 0.6; }
-          /* 墙面向山侧退一点，避免和地形表面共面 */
-          var off = 1.4;
-          pos.push(p.x, top, p.z);
-          pos.push(p.x, bot, p.z);
-          uv.push(i * 0.14, 0);
-          uv.push(i * 0.14, (top - bot) / 13);
+          /* 下坡方向 = 高度梯度的反方向（指向山外）。
+           * 必须用 heightField 而不是 groundAt —— buildRetainingWalls
+           * 在 buildTerrain 内部调用，此时模块级 terrain 还没赋值，
+           * groundAt 会一律返回 0，方向全乱。 */
+          var gx = heightField(p.x + 7, p.z, seed) - heightField(p.x - 7, p.z, seed);
+          var gz = heightField(p.x, p.z + 7, seed) - heightField(p.x, p.z - 7, seed);
+          var gl = Math.sqrt(gx * gx + gz * gz);
+          var ox = 0, oz = 0;
+          if (gl > 0.0001) { ox = -gx / gl; oz = -gz / gl; }
+          else { ox = 1; oz = 0; }
+          outward.push([ox, oz]);
+
+          var ox2 = p.x + ox * SHELF;
+          var oz2 = p.z + oz * SHELF;
+          var outerGround = heightField(ox2, oz2, seed);
+          /* 外沿底 = 实际地形高（下坡方向更矮） */
+          var outerBot = Math.min(lv - 0.4, outerGround);
+
+          pos.push(p.x, lv, p.z);          /* 0 内沿顶 */
+          pos.push(ox2, lv, oz2);          /* 1 外沿顶 */
+          pos.push(p.x, lv - 0.15, p.z);   /* 2 内沿底（与顶几乎重合，避免缝隙）*/
+          pos.push(ox2, outerBot, oz2);    /* 3 外沿底 */
+          uv.push(i * 0.12, 0, i * 0.12, 0.12, i * 0.12, 0, i * 0.12, 0.9);
         }
+
         for (var k = 0; k < chain.length - 1; k++) {
-          var a = start + k * 2, b = a + 1, cI = a + 2, d = a + 3;
-          idx.push(a, b, cI);
-          idx.push(b, d, cI);
+          var a = start + k * 4, b = a + 4;
+          /* 踏面（水平，法线朝上）: 0-1-5-4 */
+          idx.push(a, a + 1, b + 1);
+          idx.push(a, b + 1, b);
+          /* 挡墙（竖直，法线朝外）: 1-3-7-5 */
+          idx.push(a + 1, a + 3, b + 3);
+          idx.push(a + 1, b + 3, b + 1);
         }
-        vbase += chain.length * 2;
+        vbase += chain.length * 4;
       });
     }
 
@@ -706,18 +736,9 @@
     g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
     g.setIndex(idx);
     g.computeVertexNormals();
-    /* 材质不能 clone。
-     * 评审第十四轮（决定性证据）：白天的破口是**纯黑 (0,0,0)** ——
-     * 旁边是浅灰受光面。如果是「透过空洞看背景」，白天应该看到蓝天；
-     * 看到纯黑说明是**一层不接收任何光照的面**。
-     *
-     * 根因：`M.rock.clone()` 出来的材质和 M.rock 是两个独立对象，
-     * 而 applyPalette() 只改 M.rock.color —— clone 永远停在初始色
-     * #1a2230（近乎纯黑），加上 DoubleSide，背光面全黑。
-     *
-     * 修法：直接用 M.rock（不 clone），需要 DoubleSide 就改 M.rock 本身。
-     * M.rock 只被挡墙用，改它的 side 没有副作用。 */
-    M.rock.side = THREE.DoubleSide;
+    /* 台面材质偏岩灰，挡墙也是岩 —— 用同一个材质即可，
+     * 但**不能 clone**（applyPalette 只改 M.rock）。 */
+    M.rock.side = THREE.FrontSide;
     return new THREE.Mesh(g, M.rock);
   }
 
