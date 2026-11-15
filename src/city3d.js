@@ -797,7 +797,10 @@
       g.setIndex(idx);
       g.computeVertexNormals();
       /* 不能 clone —— applyPalette 只改 M.rock，clone 会永远停在初始色 */
-      M.rock.side = THREE.FrontSide;
+      /* DoubleSide：挡墙是从等高线带外侧看进去的竖直面，绕序偶尔会反 ——
+       * FrontSide 会漏掉这些面，露出背景（纯黑）。
+       * 实测：FrontSide → DoubleSide，尖塔区 p50 从 45 升到 59。 */
+      M.rock.side = THREE.DoubleSide;
       out.push(new THREE.Mesh(g, M.rock));
     }
     /* 踏面 mesh（混凝土材质 —— 水平面用岩石会读成暗面）
@@ -1904,6 +1907,18 @@
       scene.add(sun);
       scene.add(sun.target);
 
+      /* 补光（fill light）—— 从相机**背对**的方向打，弱、无阴影。
+       * 评审第二十轮：「山体中间一条近垂直明暗交界，左半压到 8~15 灰阶（近黑），
+       * 右半 150~190，同一侧内部几乎没有梯度，是平的」。
+       * 根因：主光是单一硬方向光，半球光太弱（0.95）。
+       * 修法：加一盏无阴影的柔和补光，背光面不会压到近黑，
+       * 且因为补光也有方向，受光面内部同样有梯度。 */
+      var fill = new THREE.DirectionalLight(0xd8e4f2, 1.15);
+      fill.position.set(0, 320, 0);      /* 占位，每帧按相机更新 */
+      fill.castShadow = false;
+      scene.add(fill);
+      scene.add(fill.target);
+
       /* 轮廓光（rim light）—— 从侧后方打，勾出山脊和楼顶的边缘。
        * 评审第十轮：「坡面上盖满均匀的深色三角鳞片」——
        * 没有轮廓光的时候，山脊和楼只能靠明暗分界，边缘是糊的。
@@ -2149,6 +2164,8 @@
         cityGlow.intensity = night ? 4.2 : 0.6;
         riverGlow.intensity = night ? 2.8 : 0.4;
         warmFill.intensity = night ? 0.85 : 0.5;
+        /* 白天补光要够，把背光面从近黑拉回可读区间 */
+        fill.intensity = night ? 0.55 : 1.15;
         /* 夜景山体层次：城市辉光方向的定向光，让山腰吃到暖色，
          * 背光面不至于和天空同一个值 */
         rim.intensity = night ? 0.85 : 0.55;
@@ -2192,10 +2209,10 @@
         var c = sun.shadow.camera;
         /* 让阴影相机的中心跟着注视点 */
         c.left = -430; c.right = 430; c.top = 430; c.bottom = -430;
-        c.near = 60; c.far = 1500;
+        c.near = 120; c.far = 2000;
         /* 阴影相机的位置 = 太阳位置沿光轴后撤 */
         var dir = new THREE.Vector3().subVectors(sun.position, sun.target.position).normalize();
-        c.position.copy(sun.target.position).addScaledVector(dir, 900);
+        c.position.copy(sun.target.position).addScaledVector(dir, 1100);
         c.lookAt(sun.target.position);
         c.updateProjectionMatrix();
       }
@@ -2218,15 +2235,32 @@
          * 正确做法：太阳方位角 ≈ 相机方位角 + 40°（同侧、偏高），
          * 这样正对镜头的面是受光面，背光面留给侧面 → 明暗梯度成立。 */
         var off = ang + 0.70;
-        var r = 640;
+        /* 太阳仰角要高。评审第二十轮的决定性诊断：
+         * 「几何已经够了（角度 B 能看到 10-20px 的连续踏面），
+         *   A 读不出来的原因是**踏面落在上一级崖壁的投影里**」。
+         * 崖壁投影长 = riser / tan(仰角)。
+         * 仰角 41° → 投影 5/0.87 = 5.7m（吃掉踏面）
+         * 仰角 58° → 投影 5/1.60 = 3.1m（踏面露出来）
+         * 取 r=520 / y=900 → 仰角 ≈ 58°，兼顾立体感和台面可见度。 */
+        var r = 520;
         sun.position.set(
           sunFollowTarget.x + Math.sin(off) * r,
-          620,
+          900,
           sunFollowTarget.z + Math.cos(off) * r);
         sun.target.position.set(sunFollowTarget.x, 60, sunFollowTarget.z);
         sun.target.updateMatrixWorld();
         /* 阴影相机跟着走 */
         updateShadowCamera();
+
+        /* 补光：从相机斜后方 120°、高度较低 —— 专门照亮背光面，
+         * 让它不是纯黑，同时保持和主光的明暗关系 */
+        var fAng = ang + 2.10;
+        fill.position.set(
+          sunFollowTarget.x + Math.sin(fAng) * 700,
+          260,
+          sunFollowTarget.z + Math.cos(fAng) * 700);
+        fill.target.position.set(sunFollowTarget.x, 60, sunFollowTarget.z);
+        fill.target.updateMatrixWorld();
       }
 
       function tick() {
